@@ -50,7 +50,7 @@ export default function AboutPage() {
   return (
     <>
       <Navbar />
-      <main style={{ backgroundColor: "#fff", minHeight: "100vh" }}>
+      <main style={{ backgroundColor: "#fff", minHeight: "100vh", animation: "fadeInUp 300ms ease" }}>
 
         {/* Hero */}
         <div style={{

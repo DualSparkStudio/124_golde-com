@@ -13,10 +13,10 @@ interface GoldRate {
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "0.625rem 0.875rem",
-  backgroundColor: "#111",
-  border: "1px solid rgba(201,168,76,0.2)",
-  borderRadius: "4px",
-  color: "#E8E8E8",
+  backgroundColor: "#FAFAFA",
+  border: "1px solid #E8E8E8",
+  borderRadius: "8px",
+  color: "#0A0A0A",
   fontSize: "0.9rem",
   outline: "none",
   boxSizing: "border-box",
@@ -24,12 +24,12 @@ const inputStyle: React.CSSProperties = {
 
 const labelStyle: React.CSSProperties = {
   display: "block",
-  color: "#A0A0A0",
-  fontSize: "0.75rem",
-  letterSpacing: "0.06em",
+  color: "#C9A84C",
+  fontSize: "0.72rem",
+  letterSpacing: "0.1em",
   textTransform: "uppercase",
   marginBottom: "0.375rem",
-  fontWeight: 500,
+  fontWeight: 700,
 };
 
 export default function GoldRatePage() {
@@ -85,42 +85,42 @@ export default function GoldRatePage() {
   return (
     <div style={{ maxWidth: "600px" }}>
       <div style={{ marginBottom: "2rem" }}>
-        <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.75rem", color: "#E8E8E8", marginBottom: "0.25rem" }}>Gold Rate</h1>
-        <p style={{ color: "#666", fontSize: "0.875rem" }}>View the current gold rate and set a manual override.</p>
+        <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.75rem", color: "#0A0A0A", marginBottom: "0.25rem" }}>Gold Rate</h1>
+        <p style={{ color: "#888", fontSize: "0.875rem" }}>View the current gold rate and set a manual override.</p>
       </div>
 
       {/* Current Rate */}
-      <div style={{ backgroundColor: "#1A1A1A", border: "1px solid rgba(201,168,76,0.3)", borderRadius: "4px", padding: "1.5rem", marginBottom: "1.5rem" }}>
-        <h2 style={{ color: "#C9A84C", fontSize: "0.75rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem", fontWeight: 600 }}>Current Rate</h2>
+      <div style={{ backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", padding: "1.5rem", marginBottom: "1.5rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+        <h2 style={{ color: "#C9A84C", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem", fontWeight: 700 }}>Current Rate</h2>
         {loading ? (
-          <p style={{ color: "#666" }}>Loading...</p>
+          <p style={{ color: "#888" }}>Loading...</p>
         ) : current ? (
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
             <div>
-              <div style={{ color: "#666", fontSize: "0.75rem", marginBottom: "0.25rem" }}>Rate per Gram</div>
+              <div style={{ color: "#888", fontSize: "0.75rem", marginBottom: "0.25rem" }}>Rate per Gram</div>
               <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "2rem", fontWeight: 700, color: "#C9A84C" }}>
                 ₹{current.ratePerGram.toLocaleString("en-IN")}
               </div>
             </div>
             <div>
-              <div style={{ color: "#666", fontSize: "0.75rem", marginBottom: "0.25rem" }}>Rate per Tola</div>
-              <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "2rem", fontWeight: 700, color: "#E8E8E8" }}>
+              <div style={{ color: "#888", fontSize: "0.75rem", marginBottom: "0.25rem" }}>Rate per Tola</div>
+              <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "2rem", fontWeight: 700, color: "#0A0A0A" }}>
                 ₹{current.ratePerTola.toLocaleString("en-IN")}
               </div>
             </div>
             <div>
-              <div style={{ color: "#666", fontSize: "0.75rem", marginBottom: "0.25rem" }}>Purity</div>
-              <span style={{ padding: "3px 10px", borderRadius: "12px", fontSize: "0.8rem", backgroundColor: "rgba(201,168,76,0.1)", color: "#C9A84C", border: "1px solid rgba(201,168,76,0.2)" }}>{current.purity}</span>
+              <div style={{ color: "#888", fontSize: "0.75rem", marginBottom: "0.25rem" }}>Purity</div>
+              <span style={{ padding: "3px 10px", borderRadius: "12px", fontSize: "0.8rem", backgroundColor: "rgba(201,168,76,0.12)", color: "#B8860B", border: "1px solid rgba(201,168,76,0.25)" }}>{current.purity}</span>
             </div>
             <div>
-              <div style={{ color: "#666", fontSize: "0.75rem", marginBottom: "0.25rem" }}>Source</div>
+              <div style={{ color: "#888", fontSize: "0.75rem", marginBottom: "0.25rem" }}>Source</div>
               <span style={{ padding: "3px 10px", borderRadius: "12px", fontSize: "0.8rem", backgroundColor: current.source === "manual" ? "rgba(76,175,125,0.1)" : "rgba(76,154,201,0.1)", color: current.source === "manual" ? "#4caf7d" : "#4c9ac9", border: `1px solid ${current.source === "manual" ? "rgba(76,175,125,0.2)" : "rgba(76,154,201,0.2)"}` }}>
                 {current.source === "manual" ? "Manual" : "API"}
               </span>
             </div>
             <div style={{ gridColumn: "1 / -1" }}>
-              <div style={{ color: "#666", fontSize: "0.75rem", marginBottom: "0.25rem" }}>Last Updated</div>
-              <div style={{ color: "#A0A0A0", fontSize: "0.875rem" }}>{new Date(current.updatedAt).toLocaleString("en-IN")}</div>
+              <div style={{ color: "#888", fontSize: "0.75rem", marginBottom: "0.25rem" }}>Last Updated</div>
+              <div style={{ color: "#555", fontSize: "0.875rem" }}>{new Date(current.updatedAt).toLocaleString("en-IN")}</div>
             </div>
           </div>
         ) : (
@@ -129,17 +129,17 @@ export default function GoldRatePage() {
       </div>
 
       {/* Set Manual Rate */}
-      <div style={{ backgroundColor: "#1A1A1A", border: "1px solid rgba(201,168,76,0.15)", borderRadius: "4px", padding: "1.5rem" }}>
-        <h2 style={{ color: "#C9A84C", fontSize: "0.75rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem", fontWeight: 600 }}>Set Manual Rate</h2>
-        <p style={{ color: "#666", fontSize: "0.8rem", marginBottom: "1.25rem" }}>Override the API rate with a manual value. This will be used for the next 24 hours or until updated again.</p>
+      <div style={{ backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", padding: "1.5rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+        <h2 style={{ color: "#C9A84C", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem", fontWeight: 700 }}>Set Manual Rate</h2>
+        <p style={{ color: "#888", fontSize: "0.8rem", marginBottom: "1.25rem" }}>Override the API rate with a manual value. This will be used for the next 24 hours or until updated again.</p>
 
         {error && (
-          <div style={{ padding: "0.75rem 1rem", backgroundColor: "rgba(224,82,82,0.1)", border: "1px solid rgba(224,82,82,0.3)", borderRadius: "4px", color: "#e05252", fontSize: "0.875rem", marginBottom: "1rem" }}>
+          <div style={{ padding: "0.75rem 1rem", backgroundColor: "rgba(224,82,82,0.08)", border: "1px solid rgba(224,82,82,0.2)", borderRadius: "8px", color: "#e05252", fontSize: "0.875rem", marginBottom: "1rem" }}>
             {error}
           </div>
         )}
         {success && (
-          <div style={{ padding: "0.75rem 1rem", backgroundColor: "rgba(76,175,125,0.1)", border: "1px solid rgba(76,175,125,0.3)", borderRadius: "4px", color: "#4caf7d", fontSize: "0.875rem", marginBottom: "1rem" }}>
+          <div style={{ padding: "0.75rem 1rem", backgroundColor: "rgba(76,175,125,0.08)", border: "1px solid rgba(76,175,125,0.2)", borderRadius: "8px", color: "#4caf7d", fontSize: "0.875rem", marginBottom: "1rem" }}>
             ✓ Gold rate updated successfully
           </div>
         )}
@@ -157,7 +157,7 @@ export default function GoldRatePage() {
               ))}
             </select>
           </div>
-          <button type="submit" disabled={saving} style={{ padding: "0.75rem 2rem", backgroundColor: saving ? "#555" : "#C9A84C", color: "#000", border: "none", borderRadius: "4px", fontWeight: 600, cursor: saving ? "not-allowed" : "pointer", fontSize: "0.9rem", alignSelf: "flex-start" }}>
+          <button type="submit" disabled={saving} style={{ padding: "0.75rem 2rem", background: saving ? "#ccc" : "linear-gradient(90deg, #C9A84C, #B8860B)", color: "#fff", border: "none", borderRadius: "8px", fontWeight: 600, cursor: saving ? "not-allowed" : "pointer", fontSize: "0.9rem", alignSelf: "flex-start" }}>
             {saving ? "Setting..." : "Set Rate"}
           </button>
         </form>

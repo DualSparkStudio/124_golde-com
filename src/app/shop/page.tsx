@@ -1,32 +1,19 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import SiteFooter from "@/components/SiteFooter";
 
 interface Product {
-  id: string;
-  name: string;
-  slug: string;
-  category: string;
-  typeId: string;
-  weight: number;
-  purity: string;
-  quantity: number;
-  images: { id: string; url: string; isPrimary: boolean }[];
-  salePrice: number | null;
-  discountPrice: number | null;
-  makingCharges: number;
-  occasion: string[];
-  isFeatured: boolean;
-  status: string;
-  description: string | null;
-  videoUrl: string | null;
-  primaryImage: { url: string } | null;
-  createdAt: string;
-  updatedAt: string;
+  id: string; name: string; slug: string; category: string; typeId: string;
+  weight: number; purity: string; quantity: number;
+  images: { url: string; isPrimary: boolean }[];
+  salePrice: number | null; discountPrice: number | null; makingCharges: number;
+  occasion: string[]; isFeatured: boolean; status: string;
+  description: string | null; videoUrl: string | null;
+  primaryImage: { url: string } | null; createdAt: string; updatedAt: string;
 }
 
 interface JewelryType { id: string; name: string; category: string; }
@@ -46,12 +33,6 @@ const OCCASIONS = [
   { value: "party", label: "Party" },
 ];
 
-const inp: React.CSSProperties = {
-  width: "100%", padding: "9px 12px", border: "1px solid #e8e8e8",
-  borderRadius: "6px", backgroundColor: "#fff", fontSize: "0.875rem",
-  color: "#0A0A0A", outline: "none", boxSizing: "border-box",
-};
-
 export default function ShopPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [types, setTypes] = useState<JewelryType[]>([]);
@@ -60,8 +41,8 @@ export default function ShopPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Filters
   const [category, setCategory] = useState("");
   const [typeId, setTypeId] = useState("");
   const [priceMin, setPriceMin] = useState("");
@@ -71,6 +52,7 @@ export default function ShopPage() {
   const [occasion, setOccasion] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [search, setSearch] = useState("");
+  const searchRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchProducts = useCallback(async (pg = 1) => {
     setLoading(true);
@@ -102,17 +84,34 @@ export default function ShopPage() {
     fetch("/api/gold-rate").then(r => r.json()).then(d => setGoldRate(d.rate ?? null)).catch(() => {});
   }, []);
 
+  function handleSearch(val: string) {
+    setSearch(val);
+    if (searchRef.current) clearTimeout(searchRef.current);
+    searchRef.current = setTimeout(() => fetchProducts(1), 400);
+  }
+
   function reset() {
     setCategory(""); setTypeId(""); setPriceMin(""); setPriceMax("");
     setWeightMin(""); setWeightMax(""); setOccasion(""); setSortBy("newest"); setSearch("");
   }
 
   const filteredTypes = types.filter(t => !category || t.category === category || t.category === "both");
+  const activeFilters = [category, typeId, priceMin, priceMax, weightMin, weightMax, occasion].filter(Boolean).length;
+
+  const inp: React.CSSProperties = {
+    width: "100%",
+    padding: "9px 12px",
+    border: "1px solid #e8e8e8",
+    borderRadius: "6px",
+    backgroundColor: "#fff",
+    color: "#0A0A0A",
+    fontSize: "0.9rem"
+  };
 
   return (
     <>
       <Navbar />
-      <main style={{ backgroundColor: "#fff", minHeight: "100vh" }}>
+      <main style={{ backgroundColor: "#fff", minHeight: "100vh", animation: "fadeInUp 300ms ease" }}>
         {/* Hero */}
         <div style={{ position: "relative", paddingTop: "160px", paddingBottom: "80px", textAlign: "center", backgroundColor: "#0A0A0A", overflow: "hidden" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -240,7 +239,9 @@ export default function ShopPage() {
                   </div>
                 </div>
 
-                <button onClick={() => fetchProducts(1)} style={{ width: "100%", padding: "13px", background: "linear-gradient(90deg, #C9A84C, #B8860B)", border: "none", borderRadius: "8px", color: "#fff", fontSize: "0.8rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer" }}>
+                <button onClick={() => fetchProducts(1)} style={{ width: "100%", padding: "13px", background: "linear-gradient(90deg, #C9A84C, #B8860B)", border: "none", borderRadius: "8px", color: "#fff", fontSize: "0.8rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer", boxShadow: "0 6px 18px rgba(201,168,76,0.25)", transition: "transform 0.15s ease" }}
+                  onMouseOver={(e) => (e.currentTarget.style.transform = "translateY(-1px)")}
+                  onMouseOut={(e) => (e.currentTarget.style.transform = "translateY(0)")}>
                   Apply Filters
                 </button>
               </div>

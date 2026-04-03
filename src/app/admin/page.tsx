@@ -3,254 +3,125 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import DashboardCard from "@/components/admin/DashboardCard";
+import { db } from "@/lib/mockDb";
 
-interface OrderStats {
-  total: number;
-  pending: number;
-  confirmed: number;
-  processing: number;
-  shipped: number;
-  delivered: number;
-  cancelled: number;
-}
-
-interface Order {
-  id: string;
-  orderNumber: string;
-  customerName: string;
-  customerPhone: string;
-  totalAmount: number;
-  status: string;
-  createdAt: string;
-}
+interface OrderStats { total: number; pending: number; confirmed: number; processing: number; shipped: number; delivered: number; cancelled: number; revenue: number; }
+interface Order { id: string; orderNumber: string; customerName: string; customerPhone: string; totalAmount: number; status: string; createdAt: string; }
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: "#f59e0b",
-  confirmed: "#3b82f6",
-  processing: "#8b5cf6",
-  shipped: "#06b6d4",
-  delivered: "#4caf7d",
-  cancelled: "#e05252",
+  pending: "#f59e0b", confirmed: "#3b82f6", processing: "#8b5cf6",
+  shipped: "#06b6d4", delivered: "#4caf7d", cancelled: "#e05252",
 };
 
-const QUICK_LINKS = [
-  { href: "/admin/products/new", label: "Add Product", icon: "+" },
-  { href: "/admin/orders", label: "View Orders", icon: "◎" },
-  { href: "/admin/merchant-orders/new", label: "Log Purchase", icon: "◇" },
-  { href: "/admin/gold-rate", label: "Update Gold Rate", icon: "◈" },
-  { href: "/admin/analytics", label: "Analytics", icon: "◉" },
-  { href: "/admin/other-charges", label: "Other Charges", icon: "◆" },
+const QUICK = [
+  { href: "/admin/products/new", label: "Add Product", icon: "➕", desc: "Add new jewelry" },
+  { href: "/admin/orders", label: "View Orders", icon: "📦", desc: "Manage orders" },
+  { href: "/admin/merchant-orders/new", label: "Log Purchase", icon: "🏪", desc: "Record gold purchase" },
+  { href: "/admin/gold-rate", label: "Gold Rate", icon: "✦", desc: "Update today's rate" },
+  { href: "/admin/analytics", label: "Analytics", icon: "📊", desc: "Revenue & profit" },
+  { href: "/admin/other-charges", label: "Charges", icon: "⚙️", desc: "Shipping & GST" },
 ];
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<OrderStats | null>(null);
-  const [recentOrders, setRecentOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function load() {
-      try {
-        const [statsRes, ordersRes] = await Promise.all([
-          fetch("/api/admin/orders/stats"),
-          fetch("/api/admin/orders?pageSize=8"),
-        ]);
-        if (statsRes.ok) setStats(await statsRes.json());
-        if (ordersRes.ok) {
-          const data = await ordersRes.json();
-          setRecentOrders(data.orders ?? data.items ?? []);
-        }
-      } catch {
-        // ignore
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
+    // Read directly from localStorage via db (avoids server/client mismatch)
+    const stats = {
+      total: db.orders.getAll().length,
+      pending: db.orders.getAll().filter(o => o.status === "pending").length,
+      confirmed: db.orders.getAll().filter(o => o.status === "confirmed").length,
+      processing: db.orders.getAll().filter(o => o.status === "processing").length,
+      shipped: db.orders.getAll().filter(o => o.status === "shipped").length,
+      delivered: db.orders.getAll().filter(o => o.status === "delivered").length,
+      cancelled: db.orders.getAll().filter(o => o.status === "cancelled").length,
+      revenue: db.orders.getAll().filter(o => o.status === "delivered").reduce((s, o) => s + o.totalAmount, 0),
+    };
+    setStats(stats);
+    setOrders(db.orders.getAll().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 8));
+    setLoading(false);
   }, []);
 
+  const fmt = (n: number) => "₹" + n.toLocaleString("en-IN", { maximumFractionDigits: 0 });
+
   return (
-    <div style={{ maxWidth: "1200px" }}>
-      <h1
-        style={{
-          fontFamily: "'Playfair Display', Georgia, serif",
-          fontSize: "1.875rem",
-          fontWeight: 700,
-          color: "#E8E8E8",
-          marginBottom: "0.25rem",
-        }}
-      >
-        Dashboard
-      </h1>
-      <p style={{ color: "#A0A0A0", fontSize: "0.875rem", marginBottom: "2rem" }}>
-        Welcome back to Lumière Admin
-      </p>
+    <div style={{ maxWidth: "1100px" }}>
+      {/* Header */}
+      <div style={{ marginBottom: "2rem" }}>
+        <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "1.75rem", fontWeight: 700, color: "#0A0A0A", margin: "0 0 4px" }}>Dashboard</h1>
+        <p style={{ color: "#888", fontSize: "0.875rem", margin: 0 }}>Welcome back — here&apos;s what&apos;s happening today.</p>
+      </div>
 
       {/* Stats */}
       {loading ? (
-        <div style={{ color: "#A0A0A0", marginBottom: "2rem" }}>Loading stats…</div>
-      ) : stats ? (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
-            gap: "1rem",
-            marginBottom: "2.5rem",
-          }}
-        >
-          <DashboardCard title="Total Orders" value={stats.total} icon="◎" />
-          <DashboardCard title="Pending" value={stats.pending} color="#f59e0b" />
-          <DashboardCard title="Confirmed" value={stats.confirmed} color="#3b82f6" />
-          <DashboardCard title="Processing" value={stats.processing} color="#8b5cf6" />
-          <DashboardCard title="Shipped" value={stats.shipped} color="#06b6d4" />
-          <DashboardCard title="Delivered" value={stats.delivered} color="#4caf7d" trend="positive" />
-          <DashboardCard title="Cancelled" value={stats.cancelled} color="#e05252" trend="negative" />
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
+          {[1,2,3,4,5].map(i => <div key={i} style={{ height: "110px", backgroundColor: "#F8F9FA", borderRadius: "12px", border: "1px solid #F0F0F0" }} />)}
         </div>
-      ) : null}
+      ) : stats && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
+          <DashboardCard title="Total Orders" value={stats.total} icon="📦" color="#C9A84C" />
+          <DashboardCard title="Pending" value={stats.pending} icon="⏳" color="#f59e0b" />
+          <DashboardCard title="Delivered" value={stats.delivered} icon="✅" color="#4caf7d" trend="positive" />
+          <DashboardCard title="Revenue" value={fmt(stats.revenue)} icon="₹" color="#4caf7d" trend="positive" />
+          <DashboardCard title="Cancelled" value={stats.cancelled} icon="❌" color="#e05252" trend="negative" />
+        </div>
+      )}
 
-      {/* Quick links */}
-      <h2
-        style={{
-          fontFamily: "'Playfair Display', Georgia, serif",
-          fontSize: "1.125rem",
-          color: "#E8E8E8",
-          marginBottom: "1rem",
-        }}
-      >
-        Quick Actions
-      </h2>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))",
-          gap: "0.75rem",
-          marginBottom: "2.5rem",
-        }}
-      >
-        {QUICK_LINKS.map(({ href, label, icon }) => (
-          <Link
-            key={href}
-            href={href}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.625rem",
-              padding: "0.875rem 1rem",
-              backgroundColor: "#1A1A1A",
-              border: "1px solid rgba(201,168,76,0.2)",
-              borderRadius: "4px",
-              color: "#E8E8E8",
-              textDecoration: "none",
-              fontSize: "0.875rem",
-              transition: "border-color 0.15s ease",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "#C9A84C";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "rgba(201,168,76,0.2)";
-            }}
-          >
-            <span style={{ color: "#C9A84C", fontSize: "1rem" }}>{icon}</span>
-            {label}
+      {/* Quick Actions */}
+      <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "1.1rem", color: "#0A0A0A", margin: "0 0 1rem" }}>Quick Actions</h2>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "0.75rem", marginBottom: "2rem" }}>
+        {QUICK.map(({ href, label, icon, desc }) => (
+          <Link key={href} href={href} style={{ display: "flex", flexDirection: "column", gap: "8px", padding: "1.25rem", backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", textDecoration: "none", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", transition: "all 0.2s" }}
+            onMouseEnter={(e) => { e.currentTarget.style.boxShadow = "0 4px 20px rgba(201,168,76,0.15)"; e.currentTarget.style.borderColor = "rgba(201,168,76,0.3)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.boxShadow = "0 2px 8px rgba(0,0,0,0.04)"; e.currentTarget.style.borderColor = "#F0F0F0"; }}>
+            <span style={{ fontSize: "1.5rem" }}>{icon}</span>
+            <div>
+              <div style={{ fontSize: "0.875rem", fontWeight: 600, color: "#0A0A0A" }}>{label}</div>
+              <div style={{ fontSize: "0.75rem", color: "#999", marginTop: "2px" }}>{desc}</div>
+            </div>
           </Link>
         ))}
       </div>
 
-      {/* Recent orders */}
-      <h2
-        style={{
-          fontFamily: "'Playfair Display', Georgia, serif",
-          fontSize: "1.125rem",
-          color: "#E8E8E8",
-          marginBottom: "1rem",
-        }}
-      >
-        Recent Orders
-      </h2>
-      <div
-        style={{
-          backgroundColor: "#1A1A1A",
-          border: "1px solid rgba(201,168,76,0.15)",
-          borderRadius: "4px",
-          overflow: "hidden",
-        }}
-      >
+      {/* Recent Orders */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+        <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "1.1rem", color: "#0A0A0A", margin: 0 }}>Recent Orders</h2>
+        <Link href="/admin/orders" style={{ color: "#C9A84C", textDecoration: "none", fontSize: "0.8rem", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}>View All →</Link>
+      </div>
+      <div style={{ backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ borderBottom: "1px solid rgba(201,168,76,0.15)" }}>
-              {["Order #", "Customer", "Phone", "Total", "Status", "Date"].map((h) => (
-                <th
-                  key={h}
-                  style={{
-                    padding: "0.75rem 1rem",
-                    textAlign: "left",
-                    color: "#A0A0A0",
-                    fontSize: "0.75rem",
-                    letterSpacing: "0.08em",
-                    textTransform: "uppercase",
-                    fontWeight: 500,
-                  }}
-                >
-                  {h}
-                </th>
+            <tr style={{ backgroundColor: "#FAFAFA", borderBottom: "1px solid #F0F0F0" }}>
+              {["Order #", "Customer", "Total", "Status", "Date"].map(h => (
+                <th key={h} style={{ padding: "0.875rem 1rem", textAlign: "left", color: "#888", fontSize: "0.72rem", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600 }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {recentOrders.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={6}
-                  style={{ padding: "2rem", textAlign: "center", color: "#A0A0A0" }}
-                >
-                  No orders yet
+            {orders.length === 0 ? (
+              <tr><td colSpan={5} style={{ padding: "2.5rem", textAlign: "center", color: "#bbb", fontSize: "0.875rem" }}>No orders yet</td></tr>
+            ) : orders.map(order => (
+              <tr key={order.id} style={{ borderBottom: "1px solid #F8F8F8" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLTableRowElement).style.backgroundColor = "#FAFAFA"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLTableRowElement).style.backgroundColor = "transparent"; }}>
+                <td style={{ padding: "0.875rem 1rem" }}>
+                  <Link href={`/admin/orders/${order.id}`} style={{ color: "#C9A84C", textDecoration: "none", fontSize: "0.875rem", fontWeight: 600 }}>{order.orderNumber}</Link>
                 </td>
+                <td style={{ padding: "0.875rem 1rem" }}>
+                  <div style={{ fontSize: "0.875rem", color: "#0A0A0A", fontWeight: 500 }}>{order.customerName}</div>
+                  <div style={{ fontSize: "0.75rem", color: "#999" }}>{order.customerPhone}</div>
+                </td>
+                <td style={{ padding: "0.875rem 1rem", fontSize: "0.875rem", color: "#0A0A0A", fontWeight: 600 }}>{fmt(order.totalAmount)}</td>
+                <td style={{ padding: "0.875rem 1rem" }}>
+                  <span style={{ display: "inline-block", padding: "3px 10px", borderRadius: "20px", fontSize: "0.72rem", fontWeight: 600, backgroundColor: `${STATUS_COLORS[order.status] ?? "#999"}18`, color: STATUS_COLORS[order.status] ?? "#999", textTransform: "capitalize" }}>
+                    {order.status}
+                  </span>
+                </td>
+                <td style={{ padding: "0.875rem 1rem", color: "#999", fontSize: "0.8rem" }}>{new Date(order.createdAt).toLocaleDateString("en-IN")}</td>
               </tr>
-            ) : (
-              recentOrders.map((order) => (
-                <tr
-                  key={order.id}
-                  style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
-                >
-                  <td style={{ padding: "0.75rem 1rem" }}>
-                    <Link
-                      href={`/admin/orders/${order.id}`}
-                      style={{ color: "#C9A84C", textDecoration: "none", fontSize: "0.875rem" }}
-                    >
-                      {order.orderNumber}
-                    </Link>
-                  </td>
-                  <td style={{ padding: "0.75rem 1rem", color: "#E8E8E8", fontSize: "0.875rem" }}>
-                    {order.customerName}
-                  </td>
-                  <td style={{ padding: "0.75rem 1rem", color: "#A0A0A0", fontSize: "0.875rem" }}>
-                    {order.customerPhone}
-                  </td>
-                  <td style={{ padding: "0.75rem 1rem", color: "#E8E8E8", fontSize: "0.875rem" }}>
-                    ₹{Number(order.totalAmount).toLocaleString("en-IN")}
-                  </td>
-                  <td style={{ padding: "0.75rem 1rem" }}>
-                    <span
-                      style={{
-                        display: "inline-block",
-                        padding: "0.2rem 0.625rem",
-                        borderRadius: "2px",
-                        fontSize: "0.75rem",
-                        fontWeight: 500,
-                        backgroundColor: `${STATUS_COLORS[order.status] ?? "#A0A0A0"}22`,
-                        color: STATUS_COLORS[order.status] ?? "#A0A0A0",
-                        textTransform: "capitalize",
-                      }}
-                    >
-                      {order.status}
-                    </span>
-                  </td>
-                  <td style={{ padding: "0.75rem 1rem", color: "#A0A0A0", fontSize: "0.8125rem" }}>
-                    {new Date(order.createdAt).toLocaleDateString("en-IN")}
-                  </td>
-                </tr>
-              ))
-            )}
+            ))}
           </tbody>
         </table>
       </div>

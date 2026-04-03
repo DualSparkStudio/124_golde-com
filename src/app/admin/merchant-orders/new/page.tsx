@@ -14,10 +14,10 @@ interface LineItem {
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "0.5rem 0.75rem",
-  backgroundColor: "#111",
-  border: "1px solid rgba(201,168,76,0.2)",
-  borderRadius: "4px",
-  color: "#E8E8E8",
+  backgroundColor: "#FAFAFA",
+  border: "1px solid #E8E8E8",
+  borderRadius: "8px",
+  color: "#0A0A0A",
   fontSize: "0.875rem",
   outline: "none",
   boxSizing: "border-box",
@@ -25,12 +25,12 @@ const inputStyle: React.CSSProperties = {
 
 const labelStyle: React.CSSProperties = {
   display: "block",
-  color: "#A0A0A0",
+  color: "#C9A84C",
   fontSize: "0.7rem",
-  letterSpacing: "0.06em",
+  letterSpacing: "0.1em",
   textTransform: "uppercase",
   marginBottom: "0.25rem",
-  fontWeight: 500,
+  fontWeight: 700,
 };
 
 function calcAmount(item: LineItem): number {
@@ -115,23 +115,23 @@ export default function NewMerchantOrderPage() {
   return (
     <div style={{ maxWidth: "900px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "2rem" }}>
-        <Link href="/admin/merchant-orders" style={{ color: "#666", textDecoration: "none", fontSize: "0.875rem" }}>← Merchant Orders</Link>
+        <Link href="/admin/merchant-orders" style={{ color: "#888", textDecoration: "none", fontSize: "0.875rem" }}>← Merchant Orders</Link>
         <div>
-          <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.75rem", color: "#E8E8E8", marginBottom: "0.25rem" }}>Log Purchase</h1>
-          <p style={{ color: "#666", fontSize: "0.875rem" }}>Record a new gold/silver purchase from a merchant.</p>
+          <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.75rem", color: "#0A0A0A", marginBottom: "0.25rem" }}>Log Purchase</h1>
+          <p style={{ color: "#888", fontSize: "0.875rem" }}>Record a new gold/silver purchase from a merchant.</p>
         </div>
       </div>
 
       {error && (
-        <div style={{ padding: "0.75rem 1rem", backgroundColor: "rgba(224,82,82,0.1)", border: "1px solid rgba(224,82,82,0.3)", borderRadius: "4px", color: "#e05252", fontSize: "0.875rem", marginBottom: "1rem" }}>
+        <div style={{ padding: "0.75rem 1rem", backgroundColor: "rgba(224,82,82,0.08)", border: "1px solid rgba(224,82,82,0.2)", borderRadius: "8px", color: "#e05252", fontSize: "0.875rem", marginBottom: "1rem" }}>
           {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
         {/* Merchant Details */}
-        <div style={{ backgroundColor: "#1A1A1A", border: "1px solid rgba(201,168,76,0.15)", borderRadius: "4px", padding: "1.5rem" }}>
-          <h2 style={{ color: "#C9A84C", fontSize: "0.75rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1.25rem", fontWeight: 600 }}>Merchant Details</h2>
+        <div style={{ backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", padding: "1.5rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+          <h2 style={{ color: "#C9A84C", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1.25rem", fontWeight: 700 }}>Merchant Details</h2>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
             <div>
               <label style={labelStyle}>Merchant Name *</label>
@@ -159,17 +159,17 @@ export default function NewMerchantOrderPage() {
         </div>
 
         {/* Line Items */}
-        <div style={{ backgroundColor: "#1A1A1A", border: "1px solid rgba(201,168,76,0.15)", borderRadius: "4px", padding: "1.5rem" }}>
+        <div style={{ backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", padding: "1.5rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
-            <h2 style={{ color: "#C9A84C", fontSize: "0.75rem", letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 600 }}>Line Items</h2>
-            <button type="button" onClick={addItem} style={{ padding: "0.375rem 0.875rem", backgroundColor: "transparent", color: "#C9A84C", border: "1px solid rgba(201,168,76,0.3)", borderRadius: "4px", cursor: "pointer", fontSize: "0.8rem" }}>
+            <h2 style={{ color: "#C9A84C", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 700 }}>Line Items</h2>
+            <button type="button" onClick={addItem} style={{ padding: "0.375rem 0.875rem", backgroundColor: "transparent", color: "#C9A84C", border: "1px solid rgba(201,168,76,0.3)", borderRadius: "8px", cursor: "pointer", fontSize: "0.8rem" }}>
               + Add Item
             </button>
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {items.map((item, idx) => (
-              <div key={idx} style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr auto auto", gap: "0.75rem", alignItems: "end", padding: "1rem", backgroundColor: "#111", borderRadius: "4px", border: "1px solid rgba(255,255,255,0.06)" }}>
+              <div key={idx} style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr auto auto", gap: "0.75rem", alignItems: "end", padding: "1rem", backgroundColor: "#FAFAFA", borderRadius: "8px", border: "1px solid #F0F0F0" }}>
                 <div>
                   <label style={labelStyle}>Description *</label>
                   <input style={inputStyle} value={item.description} onChange={(e) => updateItem(idx, "description", e.target.value)} placeholder="e.g. 22K Gold Bar" required />
@@ -191,7 +191,7 @@ export default function NewMerchantOrderPage() {
                   <div style={{ padding: "0.5rem 0.75rem", color: "#C9A84C", fontWeight: 600, fontSize: "0.875rem", whiteSpace: "nowrap" }}>{fmt(calcAmount(item))}</div>
                 </div>
                 <div style={{ paddingBottom: "2px" }}>
-                  <button type="button" onClick={() => removeItem(idx)} disabled={items.length === 1} style={{ padding: "0.5rem", backgroundColor: "transparent", color: items.length === 1 ? "#333" : "#e05252", border: `1px solid ${items.length === 1 ? "#333" : "rgba(224,82,82,0.3)"}`, borderRadius: "4px", cursor: items.length === 1 ? "not-allowed" : "pointer", fontSize: "0.875rem" }}>
+                  <button type="button" onClick={() => removeItem(idx)} disabled={items.length === 1} style={{ padding: "0.5rem", backgroundColor: "transparent", color: items.length === 1 ? "#ccc" : "#e05252", border: `1px solid ${items.length === 1 ? "#E8E8E8" : "rgba(224,82,82,0.3)"}`, borderRadius: "8px", cursor: items.length === 1 ? "not-allowed" : "pointer", fontSize: "0.875rem" }}>
                     ×
                   </button>
                 </div>
@@ -200,23 +200,23 @@ export default function NewMerchantOrderPage() {
           </div>
 
           {/* Totals */}
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: "2rem", marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: "2rem", marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px solid #F0F0F0" }}>
             <div style={{ textAlign: "right" }}>
-              <div style={{ color: "#666", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Total Weight</div>
-              <div style={{ color: "#E8E8E8", fontWeight: 600, fontSize: "1rem" }}>{totalWeight.toFixed(2)}g</div>
+              <div style={{ color: "#888", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Total Weight</div>
+              <div style={{ color: "#0A0A0A", fontWeight: 600, fontSize: "1rem" }}>{totalWeight.toFixed(2)}g</div>
             </div>
             <div style={{ textAlign: "right" }}>
-              <div style={{ color: "#666", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Total Cost</div>
+              <div style={{ color: "#888", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Total Cost</div>
               <div style={{ color: "#C9A84C", fontWeight: 700, fontSize: "1.25rem", fontFamily: "'Playfair Display', Georgia, serif" }}>{fmt(totalCost)}</div>
             </div>
           </div>
         </div>
 
         <div style={{ display: "flex", gap: "1rem" }}>
-          <button type="submit" disabled={saving} style={{ padding: "0.75rem 2rem", backgroundColor: saving ? "#555" : "#C9A84C", color: "#000", border: "none", borderRadius: "4px", fontWeight: 600, cursor: saving ? "not-allowed" : "pointer", fontSize: "0.9rem" }}>
+          <button type="submit" disabled={saving} style={{ padding: "0.75rem 2rem", background: saving ? "#ccc" : "linear-gradient(90deg, #C9A84C, #B8860B)", color: "#fff", border: "none", borderRadius: "8px", fontWeight: 600, cursor: saving ? "not-allowed" : "pointer", fontSize: "0.9rem" }}>
             {saving ? "Saving..." : "Log Purchase"}
           </button>
-          <Link href="/admin/merchant-orders" style={{ padding: "0.75rem 1.5rem", backgroundColor: "transparent", color: "#A0A0A0", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "4px", fontSize: "0.9rem", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
+          <Link href="/admin/merchant-orders" style={{ padding: "0.75rem 1.5rem", backgroundColor: "transparent", color: "#555", border: "1px solid #E8E8E8", borderRadius: "8px", fontSize: "0.9rem", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
             Cancel
           </Link>
         </div>

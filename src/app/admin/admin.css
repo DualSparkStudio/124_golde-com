@@ -1,0 +1,27 @@
+/* Light theme overrides for admin panel */
+
+/* Dark card backgrounds → white */
+[style*="backgroundColor: \"#1A1A1A\""],
+[style*='backgroundColor: "#1A1A1A"'] {
+  background-color: #fff !important;
+  border-color: #F0F0F0 !important;
+}
+
+/* Dark input backgrounds → light */
+[style*="backgroundColor: \"#111\""],
+[style*='backgroundColor: "#111"'] {
+  background-color: #FAFAFA !important;
+  color: #0A0A0A !important;
+  border-color: #E8E8E8 !important;
+}
+
+/* Dark text → dark on light */
+[style*="color: \"#E8E8E8\""] { color: #0A0A0A !important; }
+[style*="color: \"#A0A0A0\""] { color: #666 !important; }
+[style*="color: \"#666\""] { color: #888 !important; }
+
+/* Table header rows */
+thead tr { background-color: #FAFAFA !important; }
+thead th { color: #888 !important; border-bottom: 1px solid #F0F0F0 !important; }
+tbody tr { border-bottom: 1px solid #F8F8F8 !important; }
+tbody td { color: #0A0A0A !important; }

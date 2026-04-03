@@ -27,15 +27,15 @@ const STATUS_OPTIONS = ["", "active", "inactive", "draft"];
 const CATEGORY_OPTIONS = ["", "gold", "silver", "both"];
 const STATUS_COLORS: Record<string, string> = {
   active: "#4caf7d",
-  inactive: "#A0A0A0",
+  inactive: "#888",
   draft: "#f59e0b",
 };
 
 const inputStyle: React.CSSProperties = {
-  backgroundColor: "#1A1A1A",
-  border: "1px solid rgba(201,168,76,0.2)",
-  borderRadius: "2px",
-  color: "#E8E8E8",
+  backgroundColor: "#FAFAFA",
+  border: "1px solid #E8E8E8",
+  borderRadius: "8px",
+  color: "#0A0A0A",
   padding: "0.5rem 0.75rem",
   fontSize: "0.875rem",
   outline: "none",
@@ -117,16 +117,16 @@ export default function AdminProductsPage() {
   return (
     <div style={{ maxWidth: "1200px" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.5rem" }}>
-        <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.75rem", fontWeight: 700, color: "#E8E8E8" }}>
+        <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.75rem", fontWeight: 700, color: "#0A0A0A" }}>
           Products
         </h1>
         <Link
           href="/admin/products/new"
           style={{
             padding: "0.625rem 1.25rem",
-            backgroundColor: "#C9A84C",
-            color: "#0A0A0A",
-            borderRadius: "2px",
+            background: "linear-gradient(90deg, #C9A84C, #B8860B)",
+            color: "#fff",
+            borderRadius: "8px",
             textDecoration: "none",
             fontSize: "0.875rem",
             fontWeight: 600,
@@ -138,7 +138,7 @@ export default function AdminProductsPage() {
       </div>
 
       {/* Filters */}
-      <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginBottom: "1.25rem" }}>
+      <div style={{ backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", padding: "1rem 1.25rem", marginBottom: "1.25rem", display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
         <input
           placeholder="Search products…"
           value={query}
@@ -159,8 +159,8 @@ export default function AdminProductsPage() {
 
       {/* Bulk actions */}
       {selected.size > 0 && (
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem", padding: "0.75rem 1rem", backgroundColor: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.2)", borderRadius: "2px" }}>
-          <span style={{ color: "#C9A84C", fontSize: "0.875rem" }}>{selected.size} selected</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1rem", padding: "0.75rem 1rem", backgroundColor: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.2)", borderRadius: "8px" }}>
+          <span style={{ color: "#B8860B", fontSize: "0.875rem" }}>{selected.size} selected</span>
           <select value={bulkStatus} onChange={(e) => setBulkStatus(e.target.value)} style={inputStyle}>
             {["active", "inactive", "draft"].map((s) => (
               <option key={s} value={s}>{s}</option>
@@ -169,7 +169,7 @@ export default function AdminProductsPage() {
           <button
             onClick={applyBulkStatus}
             disabled={bulkLoading}
-            style={{ padding: "0.5rem 1rem", backgroundColor: "#C9A84C", color: "#0A0A0A", border: "none", borderRadius: "2px", fontSize: "0.8125rem", fontWeight: 600, cursor: "pointer" }}
+            style={{ padding: "0.5rem 1rem", background: "linear-gradient(90deg, #C9A84C, #B8860B)", color: "#fff", border: "none", borderRadius: "8px", fontSize: "0.8125rem", fontWeight: 600, cursor: "pointer" }}
           >
             {bulkLoading ? "Applying…" : "Apply"}
           </button>
@@ -177,10 +177,10 @@ export default function AdminProductsPage() {
       )}
 
       {/* Table */}
-      <div style={{ backgroundColor: "#1A1A1A", border: "1px solid rgba(201,168,76,0.15)", borderRadius: "4px", overflow: "auto" }}>
+      <div style={{ backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", overflow: "auto", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "700px" }}>
           <thead>
-            <tr style={{ borderBottom: "1px solid rgba(201,168,76,0.15)" }}>
+            <tr style={{ backgroundColor: "#FAFAFA", borderBottom: "1px solid #F0F0F0" }}>
               <th style={{ padding: "0.75rem 1rem", width: "40px" }}>
                 <input
                   type="checkbox"
@@ -190,7 +190,7 @@ export default function AdminProductsPage() {
                 />
               </th>
               {["Image", "Name", "Category", "Weight", "Price", "Status", "Actions"].map((h) => (
-                <th key={h} style={{ padding: "0.75rem 1rem", textAlign: "left", color: "#A0A0A0", fontSize: "0.75rem", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 500 }}>
+                <th key={h} style={{ padding: "0.75rem 1rem", textAlign: "left", color: "#888", fontSize: "0.72rem", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600 }}>
                   {h}
                 </th>
               ))}
@@ -198,12 +198,12 @@ export default function AdminProductsPage() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={8} style={{ padding: "2rem", textAlign: "center", color: "#A0A0A0" }}>Loading…</td></tr>
+              <tr><td colSpan={8} style={{ padding: "2rem", textAlign: "center", color: "#888" }}>Loading…</td></tr>
             ) : !result?.items.length ? (
-              <tr><td colSpan={8} style={{ padding: "2rem", textAlign: "center", color: "#A0A0A0" }}>No products found</td></tr>
+              <tr><td colSpan={8} style={{ padding: "2rem", textAlign: "center", color: "#888" }}>No products found</td></tr>
             ) : (
               result.items.map((product) => (
-                <tr key={product.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                <tr key={product.id} style={{ borderBottom: "1px solid #F8F8F8" }}>
                   <td style={{ padding: "0.75rem 1rem" }}>
                     <input
                       type="checkbox"
@@ -219,22 +219,22 @@ export default function AdminProductsPage() {
                         alt={product.name}
                         width={48}
                         height={48}
-                        style={{ objectFit: "cover", borderRadius: "2px", border: "1px solid rgba(201,168,76,0.2)" }}
+                        style={{ objectFit: "cover", borderRadius: "6px", border: "1px solid #F0F0F0" }}
                       />
                     ) : (
-                      <div style={{ width: 48, height: 48, backgroundColor: "#111", borderRadius: "2px", display: "flex", alignItems: "center", justifyContent: "center", color: "#A0A0A0", fontSize: "0.75rem" }}>—</div>
+                      <div style={{ width: 48, height: 48, backgroundColor: "#FAFAFA", borderRadius: "6px", border: "1px solid #F0F0F0", display: "flex", alignItems: "center", justifyContent: "center", color: "#888", fontSize: "0.75rem" }}>—</div>
                     )}
                   </td>
-                  <td style={{ padding: "0.75rem 1rem", color: "#E8E8E8", fontSize: "0.875rem", maxWidth: "200px" }}>
+                  <td style={{ padding: "0.75rem 1rem", color: "#0A0A0A", fontSize: "0.875rem", maxWidth: "200px" }}>
                     <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{product.name}</div>
                   </td>
-                  <td style={{ padding: "0.75rem 1rem", color: "#A0A0A0", fontSize: "0.875rem", textTransform: "capitalize" }}>{product.category}</td>
-                  <td style={{ padding: "0.75rem 1rem", color: "#A0A0A0", fontSize: "0.875rem" }}>{product.weight}g</td>
-                  <td style={{ padding: "0.75rem 1rem", color: "#E8E8E8", fontSize: "0.875rem" }}>
-                    {product.salePrice ? `₹${Number(product.salePrice).toLocaleString("en-IN")}` : <span style={{ color: "#A0A0A0" }}>On Request</span>}
+                  <td style={{ padding: "0.75rem 1rem", color: "#555", fontSize: "0.875rem", textTransform: "capitalize" }}>{product.category}</td>
+                  <td style={{ padding: "0.75rem 1rem", color: "#555", fontSize: "0.875rem" }}>{product.weight}g</td>
+                  <td style={{ padding: "0.75rem 1rem", color: "#0A0A0A", fontSize: "0.875rem" }}>
+                    {product.salePrice ? `₹${Number(product.salePrice).toLocaleString("en-IN")}` : <span style={{ color: "#888" }}>On Request</span>}
                   </td>
                   <td style={{ padding: "0.75rem 1rem" }}>
-                    <span style={{ display: "inline-block", padding: "0.2rem 0.625rem", borderRadius: "2px", fontSize: "0.75rem", fontWeight: 500, backgroundColor: `${STATUS_COLORS[product.status] ?? "#A0A0A0"}22`, color: STATUS_COLORS[product.status] ?? "#A0A0A0", textTransform: "capitalize" }}>
+                    <span style={{ display: "inline-block", padding: "0.2rem 0.625rem", borderRadius: "6px", fontSize: "0.75rem", fontWeight: 500, backgroundColor: `${STATUS_COLORS[product.status] ?? "#888"}22`, color: STATUS_COLORS[product.status] ?? "#888", textTransform: "capitalize" }}>
                       {product.status}
                     </span>
                   </td>
@@ -242,13 +242,13 @@ export default function AdminProductsPage() {
                     <div style={{ display: "flex", gap: "0.5rem" }}>
                       <Link
                         href={`/admin/products/${product.id}/edit`}
-                        style={{ padding: "0.3rem 0.75rem", backgroundColor: "transparent", border: "1px solid rgba(201,168,76,0.3)", borderRadius: "2px", color: "#C9A84C", textDecoration: "none", fontSize: "0.8125rem" }}
+                        style={{ padding: "0.3rem 0.75rem", backgroundColor: "transparent", border: "1px solid rgba(201,168,76,0.3)", borderRadius: "6px", color: "#C9A84C", textDecoration: "none", fontSize: "0.8125rem" }}
                       >
                         Edit
                       </Link>
                       <button
                         onClick={() => setDeleteId(product.id)}
-                        style={{ padding: "0.3rem 0.75rem", backgroundColor: "transparent", border: "1px solid rgba(224,82,82,0.3)", borderRadius: "2px", color: "#e05252", fontSize: "0.8125rem", cursor: "pointer" }}
+                        style={{ padding: "0.3rem 0.75rem", backgroundColor: "transparent", border: "1px solid rgba(224,82,82,0.3)", borderRadius: "6px", color: "#e05252", fontSize: "0.8125rem", cursor: "pointer" }}
                       >
                         Delete
                       </button>
@@ -264,11 +264,11 @@ export default function AdminProductsPage() {
       {/* Pagination */}
       {result && result.totalPages > 1 && (
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem", justifyContent: "center" }}>
-          <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} style={{ padding: "0.4rem 0.875rem", backgroundColor: "transparent", border: "1px solid rgba(201,168,76,0.2)", borderRadius: "2px", color: page === 1 ? "#A0A0A0" : "#E8E8E8", cursor: page === 1 ? "not-allowed" : "pointer", fontSize: "0.875rem" }}>
+          <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} style={{ padding: "0.4rem 0.875rem", backgroundColor: "transparent", border: "1px solid #E8E8E8", borderRadius: "8px", color: page === 1 ? "#ccc" : "#0A0A0A", cursor: page === 1 ? "not-allowed" : "pointer", fontSize: "0.875rem" }}>
             ‹ Prev
           </button>
-          <span style={{ color: "#A0A0A0", fontSize: "0.875rem" }}>Page {page} of {result.totalPages}</span>
-          <button onClick={() => setPage((p) => Math.min(result.totalPages, p + 1))} disabled={page === result.totalPages} style={{ padding: "0.4rem 0.875rem", backgroundColor: "transparent", border: "1px solid rgba(201,168,76,0.2)", borderRadius: "2px", color: page === result.totalPages ? "#A0A0A0" : "#E8E8E8", cursor: page === result.totalPages ? "not-allowed" : "pointer", fontSize: "0.875rem" }}>
+          <span style={{ color: "#888", fontSize: "0.875rem" }}>Page {page} of {result.totalPages}</span>
+          <button onClick={() => setPage((p) => Math.min(result.totalPages, p + 1))} disabled={page === result.totalPages} style={{ padding: "0.4rem 0.875rem", backgroundColor: "transparent", border: "1px solid #E8E8E8", borderRadius: "8px", color: page === result.totalPages ? "#ccc" : "#0A0A0A", cursor: page === result.totalPages ? "not-allowed" : "pointer", fontSize: "0.875rem" }}>
             Next ›
           </button>
         </div>
@@ -276,13 +276,13 @@ export default function AdminProductsPage() {
 
       {/* Delete confirm modal */}
       {deleteId && (
-        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
-          <div style={{ backgroundColor: "#1A1A1A", border: "1px solid rgba(201,168,76,0.2)", borderRadius: "4px", padding: "2rem", maxWidth: "400px", width: "90%" }}>
-            <h3 style={{ fontFamily: "'Playfair Display', Georgia, serif", color: "#E8E8E8", marginBottom: "0.75rem" }}>Delete Product?</h3>
-            <p style={{ color: "#A0A0A0", fontSize: "0.875rem", marginBottom: "1.5rem" }}>This action cannot be undone.</p>
+        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
+          <div style={{ backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", padding: "2rem", maxWidth: "400px", width: "90%", boxShadow: "0 8px 32px rgba(0,0,0,0.12)" }}>
+            <h3 style={{ fontFamily: "'Playfair Display', Georgia, serif", color: "#0A0A0A", marginBottom: "0.75rem" }}>Delete Product?</h3>
+            <p style={{ color: "#888", fontSize: "0.875rem", marginBottom: "1.5rem" }}>This action cannot be undone.</p>
             <div style={{ display: "flex", gap: "0.75rem", justifyContent: "flex-end" }}>
-              <button onClick={() => setDeleteId(null)} style={{ padding: "0.5rem 1rem", backgroundColor: "transparent", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "2px", color: "#A0A0A0", cursor: "pointer", fontSize: "0.875rem" }}>Cancel</button>
-              <button onClick={() => deleteProduct(deleteId)} style={{ padding: "0.5rem 1rem", backgroundColor: "#e05252", border: "none", borderRadius: "2px", color: "#fff", cursor: "pointer", fontSize: "0.875rem", fontWeight: 600 }}>Delete</button>
+              <button onClick={() => setDeleteId(null)} style={{ padding: "0.5rem 1rem", backgroundColor: "transparent", border: "1px solid #E8E8E8", borderRadius: "8px", color: "#555", cursor: "pointer", fontSize: "0.875rem" }}>Cancel</button>
+              <button onClick={() => deleteProduct(deleteId)} style={{ padding: "0.5rem 1rem", backgroundColor: "#e05252", border: "none", borderRadius: "8px", color: "#fff", cursor: "pointer", fontSize: "0.875rem", fontWeight: 600 }}>Delete</button>
             </div>
           </div>
         </div>

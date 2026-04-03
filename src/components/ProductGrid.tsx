@@ -27,8 +27,8 @@ export default function ProductGrid({ products, emptyMessage = 'No products foun
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-        gap: '24px',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+        gap: '28px',
       }}
     >
       {products.map((product) => (

@@ -50,3 +50,23 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
 }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+* { box-sizing: border-box; }
+
+/* Smooth scrolling */
+html { scroll-behavior: smooth; }
+
+/* Cart responsive */
+@media (max-width: 900px) {
+  .cart-grid { grid-template-columns: 1fr !important; }
+}

@@ -3,26 +3,21 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
     setLoading(true);
-
+    setError("");
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-
+      const result = await signIn("credentials", { email, password, redirect: false });
       if (result?.error) {
         setError("Invalid email or password. Please try again.");
       } else {
@@ -30,186 +25,67 @@ export default function AdminLoginPage() {
         router.refresh();
       }
     } catch {
-      setError("An unexpected error occurred. Please try again.");
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "#0a0a0a",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "1.5rem",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "400px",
-          backgroundColor: "#111111",
-          border: "1px solid #2a2a2a",
-          borderRadius: "4px",
-          padding: "2.5rem",
-        }}
-      >
-        {/* Heading */}
-        <h1
-          style={{
-            fontFamily: "'Playfair Display', Georgia, serif",
-            fontSize: "1.875rem",
-            fontWeight: 600,
-            color: "#c9a84c",
-            textAlign: "center",
-            marginBottom: "0.5rem",
-            letterSpacing: "0.02em",
-          }}
-        >
-          Admin Login
-        </h1>
-        <p
-          style={{
-            color: "#6b6b6b",
-            textAlign: "center",
-            fontSize: "0.875rem",
-            marginBottom: "2rem",
-          }}
-        >
-          Sign in to manage your jewelry store
-        </p>
+    <div style={{ minHeight: "100vh", backgroundColor: "#F8F9FA", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px", fontFamily: "Inter, system-ui, sans-serif" }}>
+      <div style={{ width: "100%", maxWidth: "420px" }}>
+        {/* Logo */}
+        <div style={{ textAlign: "center", marginBottom: "40px" }}>
+          <div style={{ width: "56px", height: "56px", borderRadius: "16px", background: "linear-gradient(135deg, #C9A84C, #B8860B)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", margin: "0 auto 16px" }}>✦</div>
+          <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "1.75rem", fontWeight: 700, color: "#0A0A0A", margin: "0 0 6px" }}>Admin Portal</h1>
+          <p style={{ color: "#888", fontSize: "0.875rem", margin: 0 }}>Sign in to manage your store</p>
+        </div>
 
-        <form onSubmit={handleSubmit} noValidate>
-          {/* Email */}
-          <div style={{ marginBottom: "1.25rem" }}>
-            <label
-              htmlFor="email"
-              style={{
-                display: "block",
-                color: "#a0a0a0",
-                fontSize: "0.75rem",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                marginBottom: "0.5rem",
-              }}
-            >
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={{
-                width: "100%",
-                backgroundColor: "#1a1a1a",
-                border: "1px solid #2a2a2a",
-                borderRadius: "2px",
-                color: "#e8e8e8",
-                padding: "0.75rem 1rem",
-                fontSize: "0.9375rem",
-                outline: "none",
-                boxSizing: "border-box",
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = "#c9a84c";
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = "#2a2a2a";
-              }}
-            />
-          </div>
-
-          {/* Password */}
-          <div style={{ marginBottom: "1.75rem" }}>
-            <label
-              htmlFor="password"
-              style={{
-                display: "block",
-                color: "#a0a0a0",
-                fontSize: "0.75rem",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                marginBottom: "0.5rem",
-              }}
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={{
-                width: "100%",
-                backgroundColor: "#1a1a1a",
-                border: "1px solid #2a2a2a",
-                borderRadius: "2px",
-                color: "#e8e8e8",
-                padding: "0.75rem 1rem",
-                fontSize: "0.9375rem",
-                outline: "none",
-                boxSizing: "border-box",
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = "#c9a84c";
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = "#2a2a2a";
-              }}
-            />
-          </div>
-
-          {/* Error message */}
+        {/* Card */}
+        <div style={{ backgroundColor: "#fff", borderRadius: "16px", padding: "2rem", boxShadow: "0 4px 24px rgba(0,0,0,0.08)", border: "1px solid #F0F0F0" }}>
           {error && (
-            <p
-              role="alert"
-              style={{
-                color: "#e05252",
-                fontSize: "0.875rem",
-                marginBottom: "1.25rem",
-                textAlign: "center",
-              }}
-            >
+            <div style={{ padding: "12px 16px", backgroundColor: "rgba(224,82,82,0.08)", border: "1px solid rgba(224,82,82,0.2)", borderRadius: "8px", color: "#e05252", fontSize: "0.875rem", marginBottom: "20px" }}>
               {error}
-            </p>
+            </div>
           )}
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: "100%",
-              backgroundColor: loading ? "#8a6f2e" : "#c9a84c",
-              color: "#0a0a0a",
-              border: "none",
-              borderRadius: "2px",
-              padding: "0.875rem",
-              fontSize: "0.875rem",
-              fontWeight: 600,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              cursor: loading ? "not-allowed" : "pointer",
-              transition: "background-color 0.2s ease",
-            }}
-            onMouseEnter={(e) => {
-              if (!loading) e.currentTarget.style.backgroundColor = "#b8943e";
-            }}
-            onMouseLeave={(e) => {
-              if (!loading) e.currentTarget.style.backgroundColor = "#c9a84c";
-            }}
-          >
-            {loading ? "Signing in…" : "Sign In"}
-          </button>
-        </form>
+          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div>
+              <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "#555", marginBottom: "6px", letterSpacing: "0.04em" }}>Email Address</label>
+              <input
+                type="email" value={email} onChange={e => setEmail(e.target.value)} required
+                placeholder="admin@jewelry.com"
+                style={{ width: "100%", padding: "11px 14px", border: "1px solid #E8E8E8", borderRadius: "8px", fontSize: "0.9rem", color: "#0A0A0A", outline: "none", boxSizing: "border-box", transition: "border-color 0.2s", backgroundColor: "#FAFAFA" }}
+                onFocus={e => e.target.style.borderColor = "#C9A84C"}
+                onBlur={e => e.target.style.borderColor = "#E8E8E8"}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "#555", marginBottom: "6px", letterSpacing: "0.04em" }}>Password</label>
+              <input
+                type="password" value={password} onChange={e => setPassword(e.target.value)} required
+                placeholder="••••••••"
+                style={{ width: "100%", padding: "11px 14px", border: "1px solid #E8E8E8", borderRadius: "8px", fontSize: "0.9rem", color: "#0A0A0A", outline: "none", boxSizing: "border-box", transition: "border-color 0.2s", backgroundColor: "#FAFAFA" }}
+                onFocus={e => e.target.style.borderColor = "#C9A84C"}
+                onBlur={e => e.target.style.borderColor = "#E8E8E8"}
+              />
+            </div>
+
+            <button type="submit" disabled={loading} style={{ width: "100%", padding: "13px", background: loading ? "#ccc" : "linear-gradient(90deg, #C9A84C, #B8860B)", color: "#fff", border: "none", borderRadius: "8px", fontSize: "0.9rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", cursor: loading ? "not-allowed" : "pointer", marginTop: "4px", transition: "opacity 0.2s" }}>
+              {loading ? "Signing in..." : "Sign In"}
+            </button>
+          </form>
+
+          <div style={{ marginTop: "20px", padding: "14px", backgroundColor: "#F8F9FA", borderRadius: "8px", border: "1px solid #F0F0F0" }}>
+            <p style={{ fontSize: "0.75rem", color: "#888", margin: "0 0 6px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Demo Credentials</p>
+            <p style={{ fontSize: "0.8rem", color: "#555", margin: "0 0 2px" }}>Email: <span style={{ color: "#C9A84C", fontWeight: 600 }}>admin@jewelry.com</span></p>
+            <p style={{ fontSize: "0.8rem", color: "#555", margin: 0 }}>Password: <span style={{ color: "#C9A84C", fontWeight: 600 }}>admin123</span></p>
+          </div>
+        </div>
+
+        <div style={{ textAlign: "center", marginTop: "24px" }}>
+          <Link href="/" style={{ color: "#888", textDecoration: "none", fontSize: "0.8rem" }}>← Back to Store</Link>
+        </div>
       </div>
     </div>
   );

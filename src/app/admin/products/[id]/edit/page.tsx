@@ -34,10 +34,10 @@ export default async function EditProductPage({ params }: Props) {
   return (
     <div>
       <div style={{ marginBottom: "2rem" }}>
-        <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.75rem", color: "#E8E8E8", marginBottom: "0.25rem" }}>
+        <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.75rem", color: "#0A0A0A", marginBottom: "0.25rem" }}>
           Edit Product
         </h1>
-        <p style={{ color: "#666", fontSize: "0.875rem" }}>
+        <p style={{ color: "#888", fontSize: "0.875rem" }}>
           Update the details for <span style={{ color: "#C9A84C" }}>{product.name}</span>.
         </p>
       </div>
