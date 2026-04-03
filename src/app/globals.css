@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* Gold palette */
+  --color-gold-400: #FFD700;
+  --color-gold-500: #C9A84C;
+  --color-gold-600: #B8860B;
+
+  /* Cream palette */
+  --color-cream-50: #FFF8F0;
+  --color-cream-100: #FAF0E6;
+
+  /* Black palette */
+  --color-black-900: #0A0A0A;
+  --color-black-800: #1A1A1A;
+
+  /* Typography */
+  --font-heading: "Playfair Display", Georgia, serif;
+  --font-body: "Inter", system-ui, sans-serif;
+
+  /* Font sizes */
+  --font-size-display: 3.5rem;
+  --font-size-h1: 2.5rem;
+  --font-size-h2: 2rem;
+  --font-size-h3: 1.5rem;
+  --font-size-h4: 1.25rem;
+  --font-size-body: 1rem;
+  --font-size-small: 0.875rem;
+  --font-size-xs: 0.75rem;
+}
+
+:root {
+  --background: #FFF8F0;
+  --foreground: #0A0A0A;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0A0A0A;
+    --foreground: #FFF8F0;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}

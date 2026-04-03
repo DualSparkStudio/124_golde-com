@@ -1,0 +1,307 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum ProductStatus {
+  active
+  inactive
+  draft
+}
+
+enum OrderStatus {
+  pending
+  confirmed
+  processing
+  shipped
+  delivered
+  cancelled
+}
+
+enum LeadType {
+  price_request
+  appointment
+  popup_offer
+}
+
+enum LeadStatus {
+  new
+  contacted
+  converted
+  closed
+}
+
+enum GoldRateSource {
+  api
+  manual
+}
+
+enum JewelryCategory {
+  gold
+  silver
+  both
+}
+
+enum UserRole {
+  admin
+  customer
+}
+
+// ─── Auth Models (NextAuth) ───────────────────────────────────────────────────
+
+model User {
+  id            String        @id @default(cuid())
+  name          String?
+  email         String        @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          UserRole      @default(customer)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  wishlistItems WishlistItem[]
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Jewelry Domain Models ────────────────────────────────────────────────────
+
+model JewelryType {
+  id        String          @id @default(cuid())
+  name      String
+  slug      String          @unique
+  category  JewelryCategory
+  isActive  Boolean         @default(true)
+  sortOrder Int             @default(0)
+  products  Product[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+}
+
+model Product {
+  id            String         @id @default(cuid())
+  name          String
+  slug          String         @unique
+  category      JewelryCategory
+  typeId        String
+  type          JewelryType    @relation(fields: [typeId], references: [id])
+  weight        Decimal
+  purity        String
+  quantity      Int            @default(0)
+  videoUrl      String?
+  description   String?
+  purchasePrice Decimal
+  salePrice     Decimal?
+  discountPrice Decimal?
+  makingCharges Decimal
+  occasion      String[]
+  isFeatured    Boolean        @default(false)
+  status        ProductStatus  @default(active)
+  images        ProductImage[]
+  wishlistItems WishlistItem[]
+  orderItems    OrderItem[]
+  leads         Lead[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([status, category, typeId])
+  @@index([slug])
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  publicId  String
+  url       String
+  isPrimary Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
+// ─── Order Models ─────────────────────────────────────────────────────────────
+
+model Order {
+  id            String      @id @default(cuid())
+  orderNumber   String      @unique
+  customerId    String?
+  customerName  String
+  customerPhone String
+  customerEmail String?
+  items         OrderItem[]
+  subtotal      Decimal
+  shippingCost  Decimal
+  gstAmount     Decimal
+  gstRate       Decimal
+  totalAmount   Decimal
+  status        OrderStatus @default(pending)
+  notes         String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([status, createdAt])
+}
+
+model OrderItem {
+  id            String  @id @default(cuid())
+  orderId       String
+  order         Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product @relation(fields: [productId], references: [id])
+  productName   String
+  weight        Decimal
+  quantity      Int
+  unitPrice     Decimal
+  makingCharges Decimal
+  purchasePrice Decimal
+}
+
+// ─── Merchant Order Models ────────────────────────────────────────────────────
+
+model MerchantOrder {
+  id            String              @id @default(cuid())
+  merchantName  String
+  invoiceNumber String?
+  items         MerchantOrderItem[]
+  totalWeight   Decimal
+  totalCost     Decimal
+  purity        String
+  purchaseDate  DateTime
+  notes         String?
+  createdAt     DateTime            @default(now())
+}
+
+model MerchantOrderItem {
+  id              String        @id @default(cuid())
+  merchantOrderId String
+  merchantOrder   MerchantOrder @relation(fields: [merchantOrderId], references: [id], onDelete: Cascade)
+  description     String
+  weight          Decimal
+  ratePerGram     Decimal
+  makingCharges   Decimal
+  amount          Decimal
+}
+
+// ─── Lead Model ───────────────────────────────────────────────────────────────
+
+model Lead {
+  id        String     @id @default(cuid())
+  type      LeadType
+  productId String?
+  product   Product?   @relation(fields: [productId], references: [id])
+  name      String
+  phone     String
+  phoneHash String
+  email     String?
+  message   String?
+  offerCode String?
+  status    LeadStatus @default(new)
+  createdAt DateTime   @default(now())
+
+  @@index([phoneHash, type])
+}
+
+// ─── Testimonial Model ────────────────────────────────────────────────────────
+
+model Testimonial {
+  id           String   @id @default(cuid())
+  customerName String
+  location     String?
+  rating       Int
+  content      String
+  productId    String?
+  imageUrl     String?
+  isPublished  Boolean  @default(false)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ─── Config / Operational Models ─────────────────────────────────────────────
+
+model OtherCharges {
+  id                  String   @id @default(cuid())
+  shippingCost        Decimal
+  gstRate             Decimal
+  otherChargesLabel   String?
+  otherChargesAmount  Decimal  @default(0)
+  updatedAt           DateTime @updatedAt
+  updatedBy           String
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  action     String
+  entityId   String
+  entityType String
+  adminId    String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+}
+
+model GoldRate {
+  id          String         @id @default(cuid())
+  ratePerGram Decimal
+  ratePerTola Decimal
+  purity      String
+  source      GoldRateSource
+  updatedAt   DateTime       @default(now())
+}
