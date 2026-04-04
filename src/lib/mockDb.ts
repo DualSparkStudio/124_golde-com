@@ -129,6 +129,19 @@ export interface MockWishlistItem {
   createdAt: string;
 }
 
+export interface MockLead {
+  id: string;
+  type: "price_request" | "appointment" | "popup_offer";
+  productId: string | null;
+  name: string;
+  phone: string;
+  email: string | null;
+  message: string | null;
+  offerCode: string | null;
+  status: "new" | "contacted" | "converted" | "closed";
+  createdAt: string;
+}
+
 // ─── Seed Data ────────────────────────────────────────────────────────────────
 
 const SEED_TYPES: MockJewelryType[] = [
@@ -176,15 +189,37 @@ const SEED_PRODUCTS: MockProduct[] = [
   { id: "prod-12", name: "22K Gold Om Pendant", slug: "22k-gold-om-pendant", category: "gold", typeId: "type-1", weight: 1.8, purity: "22K", quantity: 8, images: makeImg("prod-12", IMG_PENDANT2), videoUrl: null, description: "Sacred Om symbol pendant in 22K gold. A meaningful gift for loved ones.", purchasePrice: 10000, salePrice: 13500, discountPrice: 12800, makingCharges: 1000, occasion: ["daily-wear", "festival"], isFeatured: false, status: "active", createdAt: new Date(Date.now() - 14 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
 ];
 
+// Helper: date N months ago as ISO string
+function monthsAgo(n: number): string {
+  const d = new Date();
+  d.setMonth(d.getMonth() - n);
+  return d.toISOString();
+}
+function weeksAgo(n: number): string {
+  return new Date(Date.now() - n * 7 * 86400000).toISOString();
+}
+
 const SEED_ORDERS: MockOrder[] = [
-  { id: "order-1", orderNumber: "ORD-2024-0001", customerName: "Priya Sharma", customerPhone: "9876543210", customerEmail: "priya@example.com", items: [{ id: "oi-1", orderId: "order-1", productId: "prod-1", productName: "22K Gold Lotus Pendant", weight: 2.1, quantity: 1, unitPrice: 14800, makingCharges: 1200, purchasePrice: 12000 }], subtotal: 14800, shippingCost: 99, gstAmount: 444, gstRate: 0.03, totalAmount: 15343, status: "delivered", notes: null, createdAt: new Date(Date.now() - 10 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
-  { id: "order-2", orderNumber: "ORD-2024-0002", customerName: "Anita Patel", customerPhone: "9123456789", customerEmail: "anita@example.com", items: [{ id: "oi-2", orderId: "order-2", productId: "prod-4", productName: "925 Silver Jhumka Earrings", weight: 8.0, quantity: 1, unitPrice: 2900, makingCharges: 400, purchasePrice: 2200 }], subtotal: 2900, shippingCost: 99, gstAmount: 87, gstRate: 0.03, totalAmount: 3086, status: "shipped", notes: null, createdAt: new Date(Date.now() - 3 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
-  { id: "order-3", orderNumber: "ORD-2024-0003", customerName: "Meera Reddy", customerPhone: "9988776655", customerEmail: "meera@example.com", items: [{ id: "oi-3", orderId: "order-3", productId: "prod-3", productName: "22K Gold Floral Ring", weight: 3.2, quantity: 1, unitPrice: 22000, makingCharges: 1800, purchasePrice: 18000 }], subtotal: 22000, shippingCost: 99, gstAmount: 660, gstRate: 0.03, totalAmount: 22759, status: "pending", notes: null, createdAt: new Date(Date.now() - 1 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
-  { id: "order-4", orderNumber: "ORD-2024-0004", customerName: "Sunita Joshi", customerPhone: "9765432109", customerEmail: null, items: [{ id: "oi-4", orderId: "order-4", productId: "prod-5", productName: "22K Gold Mangalsutra Chain", weight: 5.5, quantity: 1, unitPrice: 40500, makingCharges: 2800, purchasePrice: 31000 }], subtotal: 40500, shippingCost: 99, gstAmount: 1215, gstRate: 0.03, totalAmount: 41814, status: "confirmed", notes: null, createdAt: new Date(Date.now() - 2 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
-  { id: "order-5", orderNumber: "ORD-2024-0005", customerName: "Kavitha Nair", customerPhone: "9845123456", customerEmail: "kavitha@example.com", items: [{ id: "oi-5", orderId: "order-5", productId: "prod-9", productName: "22K Gold Solitaire Ring", weight: 4.5, quantity: 1, unitPrice: 31500, makingCharges: 2200, purchasePrice: 25000 }], subtotal: 31500, shippingCost: 0, gstAmount: 945, gstRate: 0.03, totalAmount: 32445, status: "delivered", notes: "Gift wrap requested", createdAt: new Date(Date.now() - 15 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
-  { id: "order-6", orderNumber: "ORD-2024-0006", customerName: "Deepa Menon", customerPhone: "9567890123", customerEmail: "deepa@example.com", items: [{ id: "oi-6", orderId: "order-6", productId: "prod-11", productName: "22K Gold Temple Necklace", weight: 22.0, quantity: 1, unitPrice: 162000, makingCharges: 12000, purchasePrice: 125000 }], subtotal: 162000, shippingCost: 0, gstAmount: 4860, gstRate: 0.03, totalAmount: 166860, status: "processing", notes: null, createdAt: new Date(Date.now() - 5 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
-  { id: "order-7", orderNumber: "ORD-2024-0007", customerName: "Rekha Singh", customerPhone: "9312456789", customerEmail: null, items: [{ id: "oi-7", orderId: "order-7", productId: "prod-6", productName: "925 Silver Kada Bracelet", weight: 22.0, quantity: 2, unitPrice: 7200, makingCharges: 900, purchasePrice: 5500 }], subtotal: 14400, shippingCost: 99, gstAmount: 432, gstRate: 0.03, totalAmount: 14931, status: "delivered", notes: null, createdAt: new Date(Date.now() - 20 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
-  { id: "order-8", orderNumber: "ORD-2024-0008", customerName: "Pooja Iyer", customerPhone: "9876012345", customerEmail: "pooja@example.com", items: [{ id: "oi-8", orderId: "order-8", productId: "prod-12", productName: "22K Gold Om Pendant", weight: 1.8, quantity: 1, unitPrice: 12800, makingCharges: 1000, purchasePrice: 10000 }], subtotal: 12800, shippingCost: 99, gstAmount: 384, gstRate: 0.03, totalAmount: 13283, status: "cancelled", notes: "Customer requested cancellation", createdAt: new Date(Date.now() - 8 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
+  // TODAY
+  { id: "order-1", orderNumber: "ORD-2026-0001", customerName: "Priya Sharma", customerPhone: "9876543210", customerEmail: "priya@example.com", items: [{ id: "oi-1", orderId: "order-1", productId: "prod-1", productName: "22K Gold Lotus Pendant", weight: 2.1, quantity: 1, unitPrice: 14800, makingCharges: 1200, purchasePrice: 12000 }], subtotal: 14800, shippingCost: 99, gstAmount: 444, gstRate: 0.03, totalAmount: 15343, status: "delivered", notes: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  // THIS WEEK (2 days ago)
+  { id: "order-2", orderNumber: "ORD-2026-0002", customerName: "Anita Patel", customerPhone: "9123456789", customerEmail: "anita@example.com", items: [{ id: "oi-2", orderId: "order-2", productId: "prod-4", productName: "925 Silver Jhumka Earrings", weight: 8.0, quantity: 1, unitPrice: 2900, makingCharges: 400, purchasePrice: 2200 }], subtotal: 2900, shippingCost: 99, gstAmount: 87, gstRate: 0.03, totalAmount: 3086, status: "delivered", notes: null, createdAt: new Date(Date.now() - 2 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
+  // THIS WEEK (3 days ago)
+  { id: "order-9", orderNumber: "ORD-2026-0009", customerName: "Lakshmi Iyer", customerPhone: "9900112233", customerEmail: "lakshmi@example.com", items: [{ id: "oi-9", orderId: "order-9", productId: "prod-9", productName: "22K Gold Solitaire Ring", weight: 4.5, quantity: 1, unitPrice: 31500, makingCharges: 2200, purchasePrice: 25000 }], subtotal: 31500, shippingCost: 0, gstAmount: 945, gstRate: 0.03, totalAmount: 32445, status: "delivered", notes: null, createdAt: new Date(Date.now() - 3 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
+  // THIS MONTH (8 days ago)
+  { id: "order-3", orderNumber: "ORD-2026-0003", customerName: "Meera Reddy", customerPhone: "9988776655", customerEmail: "meera@example.com", items: [{ id: "oi-3", orderId: "order-3", productId: "prod-3", productName: "22K Gold Floral Ring", weight: 3.2, quantity: 1, unitPrice: 22000, makingCharges: 1800, purchasePrice: 18000 }], subtotal: 22000, shippingCost: 99, gstAmount: 660, gstRate: 0.03, totalAmount: 22759, status: "delivered", notes: null, createdAt: new Date(Date.now() - 8 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
+  // THIS MONTH (12 days ago)
+  { id: "order-10", orderNumber: "ORD-2026-0010", customerName: "Nandini Rao", customerPhone: "9811223344", customerEmail: null, items: [{ id: "oi-10", orderId: "order-10", productId: "prod-12", productName: "22K Gold Om Pendant", weight: 1.8, quantity: 1, unitPrice: 12800, makingCharges: 1000, purchasePrice: 10000 }], subtotal: 12800, shippingCost: 99, gstAmount: 384, gstRate: 0.03, totalAmount: 13283, status: "delivered", notes: null, createdAt: new Date(Date.now() - 12 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
+  // PENDING (not in revenue)
+  { id: "order-4", orderNumber: "ORD-2026-0004", customerName: "Sunita Joshi", customerPhone: "9765432109", customerEmail: null, items: [{ id: "oi-4", orderId: "order-4", productId: "prod-5", productName: "22K Gold Mangalsutra Chain", weight: 5.5, quantity: 1, unitPrice: 40500, makingCharges: 2800, purchasePrice: 31000 }], subtotal: 40500, shippingCost: 99, gstAmount: 1215, gstRate: 0.03, totalAmount: 41814, status: "pending", notes: null, createdAt: new Date(Date.now() - 1 * 86400000).toISOString(), updatedAt: new Date().toISOString() },
+  // THIS YEAR - 1 month ago
+  { id: "order-5", orderNumber: "ORD-2026-0005", customerName: "Kavitha Nair", customerPhone: "9845123456", customerEmail: "kavitha@example.com", items: [{ id: "oi-5", orderId: "order-5", productId: "prod-9", productName: "22K Gold Solitaire Ring", weight: 4.5, quantity: 1, unitPrice: 31500, makingCharges: 2200, purchasePrice: 25000 }], subtotal: 31500, shippingCost: 0, gstAmount: 945, gstRate: 0.03, totalAmount: 32445, status: "delivered", notes: "Gift wrap requested", createdAt: monthsAgo(1), updatedAt: new Date().toISOString() },
+  // THIS YEAR - 2 months ago
+  { id: "order-6", orderNumber: "ORD-2026-0006", customerName: "Deepa Menon", customerPhone: "9567890123", customerEmail: "deepa@example.com", items: [{ id: "oi-6", orderId: "order-6", productId: "prod-11", productName: "22K Gold Temple Necklace", weight: 22.0, quantity: 1, unitPrice: 162000, makingCharges: 12000, purchasePrice: 125000 }], subtotal: 162000, shippingCost: 0, gstAmount: 4860, gstRate: 0.03, totalAmount: 166860, status: "delivered", notes: null, createdAt: monthsAgo(2), updatedAt: new Date().toISOString() },
+  // THIS YEAR - 3 months ago
+  { id: "order-7", orderNumber: "ORD-2026-0007", customerName: "Rekha Singh", customerPhone: "9312456789", customerEmail: null, items: [{ id: "oi-7", orderId: "order-7", productId: "prod-6", productName: "925 Silver Kada Bracelet", weight: 22.0, quantity: 2, unitPrice: 7200, makingCharges: 900, purchasePrice: 5500 }], subtotal: 14400, shippingCost: 99, gstAmount: 432, gstRate: 0.03, totalAmount: 14931, status: "delivered", notes: null, createdAt: monthsAgo(3), updatedAt: new Date().toISOString() },
+  // CANCELLED - not in revenue
+  { id: "order-8", orderNumber: "ORD-2026-0008", customerName: "Pooja Iyer", customerPhone: "9876012345", customerEmail: "pooja@example.com", items: [{ id: "oi-8", orderId: "order-8", productId: "prod-12", productName: "22K Gold Om Pendant", weight: 1.8, quantity: 1, unitPrice: 12800, makingCharges: 1000, purchasePrice: 10000 }], subtotal: 12800, shippingCost: 99, gstAmount: 384, gstRate: 0.03, totalAmount: 13283, status: "cancelled", notes: "Customer requested cancellation", createdAt: monthsAgo(4), updatedAt: new Date().toISOString() },
 ];
 
 const SEED_MERCHANT_ORDERS: MockMerchantOrder[] = [
@@ -219,6 +254,15 @@ const SEED_GOLD_RATE: MockGoldRate = {
   updatedAt: new Date().toISOString(),
 };
 
+const SEED_LEADS: MockLead[] = [
+  { id: "lead-1", type: "appointment", productId: null, name: "Sunita Kapoor", phone: "9876543210", email: "sunita@example.com", message: "Would like to visit on Saturday afternoon for bridal jewellery consultation.", offerCode: null, status: "new", createdAt: new Date(Date.now() - 1 * 86400000).toISOString() },
+  { id: "lead-2", type: "price_request", productId: "prod-2", name: "Ravi Mehta", phone: "9123456789", email: null, message: "Please share the latest price for the bridal necklace set.", offerCode: null, status: "contacted", createdAt: new Date(Date.now() - 2 * 86400000).toISOString() },
+  { id: "lead-3", type: "appointment", productId: null, name: "Lakshmi Iyer", phone: "9988776655", email: "lakshmi@example.com", message: "Looking for anniversary gift ideas. Prefer weekday morning.", offerCode: null, status: "converted", createdAt: new Date(Date.now() - 5 * 86400000).toISOString() },
+  { id: "lead-4", type: "price_request", productId: "prod-11", name: "Arjun Nair", phone: "9765432109", email: "arjun@example.com", message: "Interested in the temple necklace. What is the current price?", offerCode: null, status: "new", createdAt: new Date(Date.now() - 3 * 86400000).toISOString() },
+  { id: "lead-5", type: "popup_offer", productId: null, name: "Preethi Sharma", phone: "9845123456", email: "preethi@example.com", message: null, offerCode: "WELCOME10", status: "closed", createdAt: new Date(Date.now() - 7 * 86400000).toISOString() },
+  { id: "lead-6", type: "appointment", productId: null, name: "Deepak Reddy", phone: "9567890123", email: null, message: "Want to see the gold bangle collection. Available on Sunday.", offerCode: null, status: "new", createdAt: new Date(Date.now() - 4 * 86400000).toISOString() },
+];
+
 // ─── Storage Engine ───────────────────────────────────────────────────────────
 
 const memStore: Record<string, unknown> = {};
@@ -239,6 +283,32 @@ function storageSet<T>(key: string, value: T): void {
   } else {
     memStore[key] = value;
   }
+}
+
+// Version bump this whenever seed data changes — forces localStorage reset
+const DB_VERSION = "v6";
+
+function initDb(): void {
+  if (typeof window === "undefined") return;
+  const stored = localStorage.getItem("mockdb_version");
+  if (stored !== DB_VERSION) {
+    // Clear all mockdb keys
+    const keys = Object.keys(localStorage).filter(k => k.startsWith("mockdb_"));
+    keys.forEach(k => localStorage.removeItem(k));
+    localStorage.setItem("mockdb_version", DB_VERSION);
+  }
+}
+
+// Run on module load (client only)
+if (typeof window !== "undefined") { initDb(); }
+
+export function resetAllData(): void {
+  if (typeof window === "undefined") return;
+  const keys = Object.keys(localStorage).filter(k => k.startsWith("mockdb_"));
+  keys.forEach(k => localStorage.removeItem(k));
+  localStorage.removeItem("mockdb_version");
+  initDb();
+  window.location.reload();
 }
 
 function getOrSeed<T>(key: string, seed: T): T {
@@ -402,6 +472,22 @@ export const db = {
       return filtered.length < all.length;
     },
   },
-};
 
-// Injected after the strReplace above — this is a no-op append to trigger save
+  leads: {
+    getAll: (): MockLead[] => getOrSeed("leads", SEED_LEADS),
+    save: (items: MockLead[]) => storageSet("leads", items),
+    create: (data: Omit<MockLead, "id" | "createdAt">): MockLead => {
+      const lead: MockLead = { ...data, id: uuidv4(), createdAt: new Date().toISOString() };
+      db.leads.save([...db.leads.getAll(), lead]);
+      return lead;
+    },
+    update: (id: string, data: Partial<MockLead>): MockLead | null => {
+      const all = db.leads.getAll();
+      const idx = all.findIndex((l) => l.id === id);
+      if (idx === -1) return null;
+      all[idx] = { ...all[idx], ...data };
+      db.leads.save(all);
+      return all[idx];
+    },
+  },
+};

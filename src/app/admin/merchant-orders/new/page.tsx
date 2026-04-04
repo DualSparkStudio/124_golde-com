@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { db } from "@/lib/mockDb";
+import { v4 as uuidv4 } from "uuid";
 
 interface LineItem {
   description: string;
@@ -71,7 +73,7 @@ export default function NewMerchantOrderPage() {
   const totalCost = items.reduce((sum, item) => sum + calcAmount(item), 0);
   const totalWeight = items.reduce((sum, item) => sum + (parseFloat(item.weight) || 0), 0);
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!merchantName.trim()) { setError("Merchant name is required"); return; }
     if (items.some((item) => !item.description.trim() || !item.weight || !item.ratePerGram)) {
@@ -80,13 +82,15 @@ export default function NewMerchantOrderPage() {
     setSaving(true);
     setError("");
     try {
-      const payload = {
+      db.merchantOrders.create({
         merchantName: merchantName.trim(),
         invoiceNumber: invoiceNumber.trim() || null,
         purchaseDate,
         purity,
         notes: notes.trim() || null,
         items: items.map((item) => ({
+          id: uuidv4(),
+          merchantOrderId: "",
           description: item.description.trim(),
           weight: parseFloat(item.weight),
           ratePerGram: parseFloat(item.ratePerGram),
@@ -95,19 +99,10 @@ export default function NewMerchantOrderPage() {
         })),
         totalWeight,
         totalCost,
-      };
-      const res = await fetch("/api/admin/merchant-orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed to save");
       router.push("/admin/merchant-orders");
-      router.refresh();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to save");
-    } finally {
       setSaving(false);
     }
   }
@@ -129,7 +124,6 @@ export default function NewMerchantOrderPage() {
       )}
 
       <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-        {/* Merchant Details */}
         <div style={{ backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", padding: "1.5rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
           <h2 style={{ color: "#C9A84C", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1.25rem", fontWeight: 700 }}>Merchant Details</h2>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
@@ -158,7 +152,6 @@ export default function NewMerchantOrderPage() {
           </div>
         </div>
 
-        {/* Line Items */}
         <div style={{ backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", padding: "1.5rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
             <h2 style={{ color: "#C9A84C", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 700 }}>Line Items</h2>
@@ -199,7 +192,6 @@ export default function NewMerchantOrderPage() {
             ))}
           </div>
 
-          {/* Totals */}
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "2rem", marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px solid #F0F0F0" }}>
             <div style={{ textAlign: "right" }}>
               <div style={{ color: "#888", fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.06em" }}>Total Weight</div>

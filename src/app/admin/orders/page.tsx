@@ -3,28 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import DashboardCard from "@/components/admin/DashboardCard";
-
-interface Order {
-  id: string;
-  orderNumber: string;
-  customerName: string;
-  customerPhone: string;
-  totalAmount: number;
-  status: string;
-  createdAt: string;
-  items: { id: string }[];
-}
-
-interface OrderStats {
-  total: number;
-  pending: number;
-  confirmed: number;
-  processing: number;
-  shipped: number;
-  delivered: number;
-  cancelled: number;
-  revenue: number;
-}
+import { db } from "@/lib/mockDb";
+import type { MockOrder } from "@/lib/mockDb";
 
 const STATUS_COLORS: Record<string, string> = {
   pending: "#C9A84C",
@@ -49,120 +29,78 @@ function fmt(n: number) {
   return "₹" + n.toLocaleString("en-IN", { maximumFractionDigits: 0 });
 }
 
+const PAGE_SIZE = 20;
+
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [stats, setStats] = useState<OrderStats | null>(null);
+  const [orders, setOrders] = useState<MockOrder[]>([]);
+  const [stats, setStats] = useState<{ total: number; pending: number; confirmed: number; processing: number; shipped: number; delivered: number; cancelled: number; revenue: number } | null>(null);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [status, setStatus] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [priceMin, setPriceMin] = useState("");
   const [priceMax, setPriceMax] = useState("");
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
-  const [lastFetch, setLastFetch] = useState<string>("");
-  const PAGE_SIZE = 20;
 
-  const fetchStats = useCallback(async () => {
-    try {
-      const res = await fetch('/api/admin/orders/stats');
-      const data = await res.json();
-      setStats(data);
-      console.log('Stats fetched:', data);
-    } catch (error) {
-      console.error('Failed to fetch stats:', error);
-    }
-  }, []);
-
-  const fetchOrders = useCallback(async () => {
+  const loadData = useCallback(() => {
     setLoading(true);
-    setRefreshing(true);
     try {
-      const params = new URLSearchParams();
-      if (status) params.set('status', status);
-      if (dateFrom) params.set('dateFrom', dateFrom);
-      if (dateTo) params.set('dateTo', dateTo);
-      if (priceMin) params.set('priceMin', priceMin);
-      if (priceMax) params.set('priceMax', priceMax);
-      params.set('page', page.toString());
-      params.set('pageSize', PAGE_SIZE.toString());
+      const all = db.orders.getAll();
 
-      const res = await fetch(`/api/admin/orders?${params.toString()}`);
-      const data = await res.json();
-      setOrders(data.orders || []);
-      setTotal(data.total || 0);
-      setLastFetch(new Date().toLocaleTimeString());
-      console.log('Orders fetched:', data.orders?.length, 'Total:', data.total);
-    } catch (error) {
-      console.error('Failed to fetch orders:', error);
-      setOrders([]);
+      // Compute stats from all orders
+      const s = { total: all.length, pending: 0, confirmed: 0, processing: 0, shipped: 0, delivered: 0, cancelled: 0, revenue: 0 };
+      for (const o of all) {
+        if (o.status in s) (s as Record<string, number>)[o.status]++;
+        if (o.status === "delivered") s.revenue += o.totalAmount;
+      }
+      setStats(s);
+
+      // Apply filters
+      let filtered = all;
+      if (status) filtered = filtered.filter((o) => o.status === status);
+      if (dateFrom) filtered = filtered.filter((o) => o.createdAt >= dateFrom);
+      if (dateTo) filtered = filtered.filter((o) => o.createdAt <= dateTo + "T23:59:59");
+      if (priceMin) filtered = filtered.filter((o) => o.totalAmount >= parseFloat(priceMin));
+      if (priceMax) filtered = filtered.filter((o) => o.totalAmount <= parseFloat(priceMax));
+
+      // Sort newest first
+      filtered = [...filtered].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      setOrders(filtered);
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
-  }, [status, dateFrom, dateTo, priceMin, priceMax, page]);
+  }, [status, dateFrom, dateTo, priceMin, priceMax]);
 
-  useEffect(() => { fetchStats(); }, [fetchStats]);
-  useEffect(() => { fetchOrders(); }, [fetchOrders]);
-  
-  // Auto-refresh every 10 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchStats();
-      fetchOrders();
-    }, 10000);
-    return () => clearInterval(interval);
-  }, [fetchStats, fetchOrders]);
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const totalPages = Math.max(1, Math.ceil(orders.length / PAGE_SIZE));
+  const pageOrders = orders.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   function handleFilter(e: React.FormEvent) {
     e.preventDefault();
     setPage(1);
-    fetchOrders();
+    loadData();
   }
 
-  async function downloadCSV() {
-    try {
-      const params = new URLSearchParams();
-      if (status) params.set('status', status);
-      if (dateFrom) params.set('dateFrom', dateFrom);
-      if (dateTo) params.set('dateTo', dateTo);
-      params.set('pageSize', '1000'); // Get all orders for export
-      
-      const res = await fetch(`/api/admin/orders?${params.toString()}`);
-      const data = await res.json();
-      const filtered = data.orders || [];
-      
-      const header = "Order Number,Customer,Phone,Items,Subtotal,Shipping,GST,Total,Status,Date";
-      const rows = filtered.map((o: any) => [o.orderNumber, o.customerName, o.customerPhone, o.items.length, o.subtotal, o.shippingCost, o.gstAmount, o.totalAmount, o.status, o.createdAt.slice(0, 10)].join(","));
-      const csv = [header, ...rows].join("\n");
-      const blob = new Blob([csv], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a"); a.href = url; a.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Failed to export CSV:', error);
-    }
+  function downloadCSV() {
+    const header = "Order Number,Customer,Phone,Items,Subtotal,Shipping,GST,Total,Status,Date";
+    const rows = orders.map((o) => [o.orderNumber, o.customerName, o.customerPhone, o.items.length, o.subtotal, o.shippingCost, o.gstAmount, o.totalAmount, o.status, o.createdAt.slice(0, 10)].join(","));
+    const csv = [header, ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+    URL.revokeObjectURL(url);
   }
-
-  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
     <div>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "2rem" }}>
         <div>
           <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.75rem", color: "#0A0A0A", marginBottom: "0.25rem" }}>Orders</h1>
-          <p style={{ color: "#888", fontSize: "0.875rem" }}>
-            Manage and track customer orders.
-            {lastFetch && (
-              <span style={{ marginLeft: "1rem", color: refreshing ? "#C9A84C" : "#4caf7d" }}>
-                {refreshing ? "Refreshing..." : `Last updated: ${lastFetch}`}
-              </span>
-            )}
-          </p>
+          <p style={{ color: "#888", fontSize: "0.875rem" }}>Manage and track customer orders.</p>
         </div>
         <div style={{ display: "flex", gap: "0.75rem" }}>
-          <button onClick={() => { fetchStats(); fetchOrders(); }} style={{ padding: "0.5rem 1.25rem", backgroundColor: "#C9A84C", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "0.875rem", fontWeight: 600 }}>
+          <button onClick={loadData} style={{ padding: "0.5rem 1.25rem", backgroundColor: "#C9A84C", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "0.875rem", fontWeight: 600 }}>
             🔄 Refresh
           </button>
           <button onClick={downloadCSV} style={{ padding: "0.5rem 1.25rem", backgroundColor: "transparent", color: "#C9A84C", border: "1px solid rgba(201,168,76,0.4)", borderRadius: "8px", cursor: "pointer", fontSize: "0.875rem" }}>
@@ -171,7 +109,6 @@ export default function OrdersPage() {
         </div>
       </div>
 
-      {/* Stats */}
       {stats && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
           <DashboardCard title="Total Orders" value={stats.total} icon="📦" />
@@ -182,7 +119,6 @@ export default function OrdersPage() {
         </div>
       )}
 
-      {/* Filters */}
       <form onSubmit={handleFilter} style={{ backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", padding: "1.25rem", marginBottom: "1.5rem", display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "flex-end", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
           <label style={{ color: "#C9A84C", fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 700 }}>Status</label>
@@ -217,7 +153,6 @@ export default function OrdersPage() {
         </button>
       </form>
 
-      {/* Table */}
       <div style={{ backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
@@ -230,9 +165,9 @@ export default function OrdersPage() {
           <tbody>
             {loading ? (
               <tr><td colSpan={7} style={{ padding: "2rem", textAlign: "center", color: "#888" }}>Loading...</td></tr>
-            ) : orders.length === 0 ? (
+            ) : pageOrders.length === 0 ? (
               <tr><td colSpan={7} style={{ padding: "2rem", textAlign: "center", color: "#888" }}>No orders found.</td></tr>
-            ) : orders.map((order) => (
+            ) : pageOrders.map((order) => (
               <tr key={order.id} style={{ borderBottom: "1px solid #F8F8F8" }}>
                 <td style={{ padding: "0.875rem 1rem", color: "#C9A84C", fontFamily: "monospace", fontSize: "0.85rem" }}>{order.orderNumber}</td>
                 <td style={{ padding: "0.875rem 1rem" }}>
@@ -258,7 +193,6 @@ export default function OrdersPage() {
         </table>
       </div>
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem", marginTop: "1.5rem" }}>
           <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} style={{ padding: "0.375rem 0.875rem", backgroundColor: "transparent", color: page === 1 ? "#ccc" : "#C9A84C", border: `1px solid ${page === 1 ? "#E8E8E8" : "rgba(201,168,76,0.3)"}`, borderRadius: "8px", cursor: page === 1 ? "not-allowed" : "pointer", fontSize: "0.875rem" }}>← Prev</button>

@@ -1,14 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
-interface GoldRate {
-  ratePerGram: number;
-  ratePerTola: number;
-  purity: string;
-  source: string;
-  updatedAt: string;
-}
+import { db } from "@/lib/mockDb";
+import type { MockGoldRate } from "@/lib/mockDb";
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
@@ -33,7 +27,7 @@ const labelStyle: React.CSSProperties = {
 };
 
 export default function GoldRatePage() {
-  const [current, setCurrent] = useState<GoldRate | null>(null);
+  const [current, setCurrent] = useState<MockGoldRate | null>(null);
   const [loading, setLoading] = useState(true);
   const [rate, setRate] = useState("");
   const [unit, setUnit] = useState("per_gram_22k");
@@ -42,14 +36,11 @@ export default function GoldRatePage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/gold-rate")
-      .then((r) => r.json())
-      .then((data) => setCurrent(data.rate ?? data))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    try { setCurrent(db.goldRate.get()); } catch { /* ignore */ }
+    setLoading(false);
   }, []);
 
-  async function handleSave(e: React.FormEvent) {
+  function handleSave(e: React.FormEvent) {
     e.preventDefault();
     const rateVal = parseFloat(rate);
     if (!rateVal || rateVal <= 0) { setError("Rate must be greater than 0"); return; }
@@ -57,14 +48,25 @@ export default function GoldRatePage() {
     setError("");
     setSuccess(false);
     try {
-      const res = await fetch("/api/admin/gold-rate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rate: rateVal, unit }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed to set rate");
-      setCurrent(data.rate ?? data);
+      const TOLA = 11.6638;
+      let ratePerGram: number;
+      let ratePerTola: number;
+      if (unit === "per_gram_22k") {
+        ratePerGram = rateVal;
+        ratePerTola = Math.round(rateVal * TOLA);
+      } else if (unit === "per_gram_24k") {
+        ratePerGram = Math.round(rateVal * 22 / 24);
+        ratePerTola = Math.round(ratePerGram * TOLA);
+      } else if (unit === "per_tola_22k") {
+        ratePerGram = Math.round(rateVal / TOLA);
+        ratePerTola = rateVal;
+      } else {
+        const g24 = rateVal / TOLA;
+        ratePerGram = Math.round(g24 * 22 / 24);
+        ratePerTola = Math.round(ratePerGram * TOLA);
+      }
+      db.goldRate.set({ ratePerGram, ratePerTola, purity: "22K", source: "manual" });
+      setCurrent(db.goldRate.get());
       setRate("");
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
@@ -89,7 +91,6 @@ export default function GoldRatePage() {
         <p style={{ color: "#888", fontSize: "0.875rem" }}>View the current gold rate and set a manual override.</p>
       </div>
 
-      {/* Current Rate */}
       <div style={{ backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", padding: "1.5rem", marginBottom: "1.5rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
         <h2 style={{ color: "#C9A84C", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem", fontWeight: 700 }}>Current Rate</h2>
         {loading ? (
@@ -98,15 +99,11 @@ export default function GoldRatePage() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
             <div>
               <div style={{ color: "#888", fontSize: "0.75rem", marginBottom: "0.25rem" }}>Rate per Gram</div>
-              <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "2rem", fontWeight: 700, color: "#C9A84C" }}>
-                ₹{current.ratePerGram.toLocaleString("en-IN")}
-              </div>
+              <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "2rem", fontWeight: 700, color: "#C9A84C" }}>₹{current.ratePerGram.toLocaleString("en-IN")}</div>
             </div>
             <div>
               <div style={{ color: "#888", fontSize: "0.75rem", marginBottom: "0.25rem" }}>Rate per Tola</div>
-              <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "2rem", fontWeight: 700, color: "#0A0A0A" }}>
-                ₹{current.ratePerTola.toLocaleString("en-IN")}
-              </div>
+              <div style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "2rem", fontWeight: 700, color: "#0A0A0A" }}>₹{current.ratePerTola.toLocaleString("en-IN")}</div>
             </div>
             <div>
               <div style={{ color: "#888", fontSize: "0.75rem", marginBottom: "0.25rem" }}>Purity</div>
@@ -128,22 +125,11 @@ export default function GoldRatePage() {
         )}
       </div>
 
-      {/* Set Manual Rate */}
       <div style={{ backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", padding: "1.5rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
         <h2 style={{ color: "#C9A84C", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem", fontWeight: 700 }}>Set Manual Rate</h2>
-        <p style={{ color: "#888", fontSize: "0.8rem", marginBottom: "1.25rem" }}>Override the API rate with a manual value. This will be used for the next 24 hours or until updated again.</p>
-
-        {error && (
-          <div style={{ padding: "0.75rem 1rem", backgroundColor: "rgba(224,82,82,0.08)", border: "1px solid rgba(224,82,82,0.2)", borderRadius: "8px", color: "#e05252", fontSize: "0.875rem", marginBottom: "1rem" }}>
-            {error}
-          </div>
-        )}
-        {success && (
-          <div style={{ padding: "0.75rem 1rem", backgroundColor: "rgba(76,175,125,0.08)", border: "1px solid rgba(76,175,125,0.2)", borderRadius: "8px", color: "#4caf7d", fontSize: "0.875rem", marginBottom: "1rem" }}>
-            ✓ Gold rate updated successfully
-          </div>
-        )}
-
+        <p style={{ color: "#888", fontSize: "0.8rem", marginBottom: "1.25rem" }}>Override the current rate with a manual value.</p>
+        {error && <div style={{ padding: "0.75rem 1rem", backgroundColor: "rgba(224,82,82,0.08)", border: "1px solid rgba(224,82,82,0.2)", borderRadius: "8px", color: "#e05252", fontSize: "0.875rem", marginBottom: "1rem" }}>{error}</div>}
+        {success && <div style={{ padding: "0.75rem 1rem", backgroundColor: "rgba(76,175,125,0.08)", border: "1px solid rgba(76,175,125,0.2)", borderRadius: "8px", color: "#4caf7d", fontSize: "0.875rem", marginBottom: "1rem" }}>✓ Gold rate updated successfully</div>}
         <form onSubmit={handleSave} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           <div>
             <label style={labelStyle}>Rate (₹) *</label>

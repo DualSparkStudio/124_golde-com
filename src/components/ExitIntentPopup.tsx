@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { leadsStore } from '@/lib/leadsStore';
 
 function generateOfferCode() {
   return 'LUMIERE5-' + Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -38,24 +39,16 @@ export default function ExitIntentPopup() {
     };
   }, []);
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+    if (!phone.trim()) { setError('Phone number is required.'); return; }
     setLoading(true);
     try {
-      const res = await fetch('/api/leads/popup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone, email: email || undefined, offerCode }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || 'Something went wrong. Please try again.');
-      } else {
-        setSubmitted(true);
-      }
+      leadsStore.add({ type: 'popup_offer', name: '', phone, email: email || undefined, offerCode });
+      setSubmitted(true);
     } catch {
-      setError('Network error. Please try again.');
+      setError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }

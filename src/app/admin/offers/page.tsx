@@ -2,15 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { db } from '@/lib/mockDb';
+import type { MockProduct } from '@/lib/mockDb';
 
-interface Product {
-  id: string;
-  name: string;
-  category: string;
-  salePrice: number | null;
-  discountPrice: number | null;
-  slug: string;
-}
+type Product = Pick<MockProduct, 'id' | 'name' | 'category' | 'salePrice' | 'discountPrice' | 'slug'>;
 
 export default function OffersPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -18,20 +13,12 @@ export default function OffersPage() {
   const [filter, setFilter] = useState<'all' | 'discounted' | 'no-discount'>('all');
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
     try {
-      const res = await fetch('/api/admin/products');
-      const data = await res.json();
-      setProducts(data.products || []);
-    } catch (error) {
-      console.error('Failed to fetch products:', error);
+      setProducts(db.products.getAll());
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const filteredProducts = products.filter(p => {
     if (filter === 'discounted') return p.discountPrice != null;

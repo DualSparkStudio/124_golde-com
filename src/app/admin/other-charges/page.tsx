@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { db } from "@/lib/mockDb";
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
@@ -35,37 +36,31 @@ export default function OtherChargesPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("/api/admin/other-charges")
-      .then((r) => r.json())
-      .then((data) => {
-        const c = data.charges ?? data;
-        setShippingCost(c.shippingCost?.toString() ?? "0");
-        setGstRate(((c.gstRate ?? 0) * 100).toString());
-        setOtherLabel(c.otherChargesLabel ?? "");
-        setOtherAmount(c.otherChargesAmount?.toString() ?? "0");
-      })
-      .catch(() => setError("Failed to load charges"))
-      .finally(() => setLoading(false));
+    try {
+      const c = db.otherCharges.get();
+      setShippingCost(c.shippingCost?.toString() ?? "0");
+      setGstRate(((c.gstRate ?? 0) * 100).toString());
+      setOtherLabel(c.otherChargesLabel ?? "");
+      setOtherAmount(c.otherChargesAmount?.toString() ?? "0");
+    } catch {
+      setError("Failed to load charges");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  async function handleSave(e: React.FormEvent) {
+  function handleSave(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
     setError("");
     setSuccess(false);
     try {
-      const res = await fetch("/api/admin/other-charges", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          shippingCost: parseFloat(shippingCost) || 0,
-          gstRate: (parseFloat(gstRate) || 0) / 100,
-          otherChargesLabel: otherLabel || null,
-          otherChargesAmount: parseFloat(otherAmount) || 0,
-        }),
+      db.otherCharges.set({
+        shippingCost: parseFloat(shippingCost) || 0,
+        gstRate: (parseFloat(gstRate) || 0) / 100,
+        otherChargesLabel: otherLabel || null,
+        otherChargesAmount: parseFloat(otherAmount) || 0,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed to save");
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: unknown) {

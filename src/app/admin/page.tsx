@@ -3,9 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import DashboardCard from "@/components/admin/DashboardCard";
-
-interface OrderStats { total: number; pending: number; confirmed: number; processing: number; shipped: number; delivered: number; cancelled: number; revenue: number; }
-interface Order { id: string; orderNumber: string; customerName: string; customerPhone: string; totalAmount: number; status: string; createdAt: string; }
+import { db } from "@/lib/mockDb";
+import type { MockOrder } from "@/lib/mockDb";
 
 const STATUS_COLORS: Record<string, string> = {
   pending: "#f59e0b", confirmed: "#3b82f6", processing: "#8b5cf6",
@@ -22,47 +21,36 @@ const QUICK = [
 ];
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<OrderStats | null>(null);
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [stats, setStats] = useState<{ total: number; pending: number; confirmed: number; processing: number; shipped: number; delivered: number; cancelled: number; revenue: number } | null>(null);
+  const [orders, setOrders] = useState<MockOrder[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch stats
-        const statsRes = await fetch('/api/admin/orders/stats');
-        const statsData = await statsRes.json();
-        setStats(statsData);
-
-        // Fetch recent orders
-        const ordersRes = await fetch('/api/admin/orders?pageSize=8');
-        const ordersData = await ordersRes.json();
-        setOrders(ordersData.orders || []);
-      } catch (error) {
-        console.error('Failed to fetch dashboard data:', error);
-      } finally {
-        setLoading(false);
+    try {
+      const all = db.orders.getAll();
+      const s = { total: all.length, pending: 0, confirmed: 0, processing: 0, shipped: 0, delivered: 0, cancelled: 0, revenue: 0 };
+      for (const o of all) {
+        if (o.status in s) (s as Record<string, number>)[o.status]++;
+        if (o.status === "delivered") s.revenue += o.totalAmount;
       }
-    };
-
-    fetchData();
-    
-    // Auto-refresh every 10 seconds
-    const interval = setInterval(fetchData, 10000);
-    return () => clearInterval(interval);
+      setStats(s);
+      // Recent 8 orders, newest first
+      const recent = [...all].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 8);
+      setOrders(recent);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   const fmt = (n: number) => "₹" + n.toLocaleString("en-IN", { maximumFractionDigits: 0 });
 
   return (
     <div style={{ maxWidth: "1100px" }}>
-      {/* Header */}
       <div style={{ marginBottom: "2rem" }}>
         <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "1.75rem", fontWeight: 700, color: "#0A0A0A", margin: "0 0 4px" }}>Dashboard</h1>
         <p style={{ color: "#888", fontSize: "0.875rem", margin: 0 }}>Welcome back — here&apos;s what&apos;s happening today.</p>
       </div>
 
-      {/* Stats */}
       {loading ? (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
           {[1,2,3,4,5].map(i => <div key={i} style={{ height: "110px", backgroundColor: "#F8F9FA", borderRadius: "12px", border: "1px solid #F0F0F0" }} />)}
@@ -77,7 +65,6 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* Quick Actions */}
       <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "1.1rem", color: "#0A0A0A", margin: "0 0 1rem" }}>Quick Actions</h2>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "0.75rem", marginBottom: "2rem" }}>
         {QUICK.map(({ href, label, icon, desc }) => (
@@ -93,7 +80,6 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* Recent Orders */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
         <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "1.1rem", color: "#0A0A0A", margin: 0 }}>Recent Orders</h2>
         <Link href="/admin/orders" style={{ color: "#C9A84C", textDecoration: "none", fontSize: "0.8rem", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}>View All →</Link>

@@ -11,6 +11,7 @@ const NAV = [
   { href: "/admin/types", label: "Jewelry Types", icon: "🏷️" },
   { href: "/admin/orders", label: "Orders", icon: "📦" },
   { href: "/admin/merchant-orders", label: "Merchant Orders", icon: "🏪" },
+  { href: "/admin/appointments", label: "Appointments", icon: "📅" },
   { href: "/admin/offers", label: "Offers & Discounts", icon: "🎁" },
   { href: "/admin/other-charges", label: "Other Charges", icon: "⚙️" },
   { href: "/admin/gold-rate", label: "Gold Rate", icon: "✦" },

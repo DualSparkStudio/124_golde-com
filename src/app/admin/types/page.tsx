@@ -1,15 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-
-interface JewelryType {
-  id: string;
-  name: string;
-  slug: string;
-  category: string;
-  isActive: boolean;
-  sortOrder: number;
-}
+import { useState, useEffect } from "react";
+import { db } from "@/lib/mockDb";
+import type { MockJewelryType } from "@/lib/mockDb";
 
 const inputStyle: React.CSSProperties = {
   padding: "0.5rem 0.75rem",
@@ -22,44 +15,39 @@ const inputStyle: React.CSSProperties = {
 };
 
 export default function TypesPage() {
-  const [types, setTypes] = useState<JewelryType[]>([]);
+  const [types, setTypes] = useState<MockJewelryType[]>([]);
   const [loading, setLoading] = useState(true);
   const [newName, setNewName] = useState("");
-  const [newCategory, setNewCategory] = useState("both");
+  const [newCategory, setNewCategory] = useState<"gold" | "silver" | "both">("both");
   const [adding, setAdding] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [error, setError] = useState("");
 
-  const fetchTypes = useCallback(async () => {
+  function loadTypes() {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/types");
-      const data = await res.json();
-      setTypes(data.types ?? []);
+      setTypes(db.types.getAll());
     } finally {
       setLoading(false);
     }
-  }, []);
+  }
 
-  useEffect(() => { fetchTypes(); }, [fetchTypes]);
+  useEffect(() => { loadTypes(); }, []);
 
-  async function handleAdd(e: React.FormEvent) {
+  function handleAdd(e: React.FormEvent) {
     e.preventDefault();
     if (!newName.trim()) return;
     setAdding(true);
     setError("");
     try {
-      const res = await fetch("/api/admin/types", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newName.trim(), category: newCategory }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed to add type");
+      const slug = newName.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+      const existing = db.types.getAll();
+      const sortOrder = existing.length > 0 ? Math.max(...existing.map((t) => t.sortOrder)) + 1 : 1;
+      db.types.create({ name: newName.trim(), slug, category: newCategory, isActive: true, sortOrder });
       setNewName("");
       setNewCategory("both");
-      fetchTypes();
+      loadTypes();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to add");
     } finally {
@@ -67,28 +55,26 @@ export default function TypesPage() {
     }
   }
 
-  async function handleEdit(id: string) {
+  function handleEdit(id: string) {
     if (!editName.trim()) return;
+    setError("");
     try {
-      const res = await fetch(`/api/admin/types/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: editName.trim() }),
-      });
-      if (!res.ok) throw new Error("Failed to update");
+      const result = db.types.update(id, { name: editName.trim() });
+      if (!result) throw new Error("Type not found");
       setEditId(null);
-      fetchTypes();
+      loadTypes();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to update");
     }
   }
 
-  async function handleDelete(id: string, name: string) {
+  function handleDelete(id: string, name: string) {
     if (!confirm(`Delete type "${name}"? This cannot be undone.`)) return;
+    setError("");
     try {
-      const res = await fetch(`/api/admin/types/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete");
-      fetchTypes();
+      const ok = db.types.delete(id);
+      if (!ok) throw new Error("Failed to delete");
+      loadTypes();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to delete");
     }
@@ -116,7 +102,6 @@ export default function TypesPage() {
         </div>
       )}
 
-      {/* Add new type */}
       <div style={{ backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", padding: "1.25rem", marginBottom: "1.5rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
         <h2 style={{ color: "#C9A84C", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem", fontWeight: 700 }}>Add New Type</h2>
         <form onSubmit={handleAdd} style={{ display: "flex", gap: "0.75rem", alignItems: "flex-end", flexWrap: "wrap" }}>
@@ -126,7 +111,7 @@ export default function TypesPage() {
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
             <label style={{ color: "#C9A84C", fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 700 }}>Category</label>
-            <select style={inputStyle} value={newCategory} onChange={(e) => setNewCategory(e.target.value)}>
+            <select style={inputStyle} value={newCategory} onChange={(e) => setNewCategory(e.target.value as "gold" | "silver" | "both")}>
               <option value="gold">Gold</option>
               <option value="silver">Silver</option>
               <option value="both">Both</option>
@@ -138,7 +123,6 @@ export default function TypesPage() {
         </form>
       </div>
 
-      {/* Types table */}
       <div style={{ backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
@@ -158,16 +142,12 @@ export default function TypesPage() {
                 <td style={{ padding: "0.875rem 1rem", color: "#0A0A0A" }}>
                   {editId === type.id ? (
                     <input style={{ ...inputStyle, padding: "0.375rem 0.625rem" }} value={editName} onChange={(e) => setEditName(e.target.value)} autoFocus />
-                  ) : (
-                    type.name
-                  )}
+                  ) : type.name}
                 </td>
                 <td style={{ padding: "0.875rem 1rem", color: "#888", fontSize: "0.8rem", fontFamily: "monospace" }}>{type.slug}</td>
                 <td style={{ padding: "0.875rem 1rem" }}>{categoryBadge(type.category)}</td>
                 <td style={{ padding: "0.875rem 1rem" }}>
-                  <span style={{ color: type.isActive ? "#4caf7d" : "#e05252", fontSize: "0.8rem" }}>
-                    {type.isActive ? "Active" : "Inactive"}
-                  </span>
+                  <span style={{ color: type.isActive ? "#4caf7d" : "#e05252", fontSize: "0.8rem" }}>{type.isActive ? "Active" : "Inactive"}</span>
                 </td>
                 <td style={{ padding: "0.875rem 1rem" }}>
                   <div style={{ display: "flex", gap: "0.5rem" }}>

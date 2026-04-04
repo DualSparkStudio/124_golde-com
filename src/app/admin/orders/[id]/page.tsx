@@ -1,35 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-
-interface OrderItem {
-  id: string;
-  productName: string;
-  weight: number;
-  quantity: number;
-  unitPrice: number;
-  makingCharges: number;
-}
-
-interface Order {
-  id: string;
-  orderNumber: string;
-  customerName: string;
-  customerPhone: string;
-  customerEmail: string | null;
-  items: OrderItem[];
-  subtotal: number;
-  shippingCost: number;
-  gstAmount: number;
-  gstRate: number;
-  totalAmount: number;
-  status: string;
-  notes: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+import { db } from "@/lib/mockDb";
+import type { MockOrder } from "@/lib/mockDb";
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
   pending: ["confirmed", "cancelled"],
@@ -51,37 +26,34 @@ function fmt(n: number) {
 
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const [order, setOrder] = useState<Order | null>(null);
+  const [order, setOrder] = useState<MockOrder | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [newStatus, setNewStatus] = useState("");
   const [error, setError] = useState("");
 
-  const fetchOrder = useCallback(async () => {
+  useEffect(() => {
     try {
-      const res = await fetch(`/api/admin/orders/${id}`);
-      const data = await res.json();
-      setOrder(data.order ?? data);
+      const found = db.orders.findById(id);
+      setOrder(found);
     } finally {
       setLoading(false);
     }
   }, [id]);
 
-  useEffect(() => { fetchOrder(); }, [fetchOrder]);
-
-  async function handleStatusUpdate() {
+  function handleStatusUpdate() {
     if (!newStatus || !order) return;
+    const allowed = VALID_TRANSITIONS[order.status] ?? [];
+    if (!allowed.includes(newStatus)) {
+      setError(`Cannot transition from ${order.status} to ${newStatus}`);
+      return;
+    }
     setUpdating(true);
     setError("");
     try {
-      const res = await fetch(`/api/admin/orders/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed to update status");
-      setOrder(data.order ?? data);
+      const updated = db.orders.update(id, { status: newStatus as MockOrder["status"] });
+      if (!updated) throw new Error("Order not found");
+      setOrder(updated);
       setNewStatus("");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to update");
@@ -97,7 +69,6 @@ export default function OrderDetailPage() {
 
   return (
     <div style={{ maxWidth: "900px" }}>
-      {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "2rem" }}>
         <Link href="/admin/orders" style={{ color: "#888", textDecoration: "none", fontSize: "0.875rem" }}>← Orders</Link>
         <div style={{ flex: 1 }}>
@@ -118,7 +89,6 @@ export default function OrderDetailPage() {
       )}
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "1.5rem" }}>
-        {/* Customer Info */}
         <div style={{ backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", padding: "1.25rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
           <h2 style={{ color: "#C9A84C", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem", fontWeight: 700 }}>Customer</h2>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
@@ -128,7 +98,6 @@ export default function OrderDetailPage() {
           </div>
         </div>
 
-        {/* Status Update */}
         <div style={{ backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", padding: "1.25rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
           <h2 style={{ color: "#C9A84C", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem", fontWeight: 700 }}>Update Status</h2>
           {nextStatuses.length === 0 ? (
@@ -150,7 +119,6 @@ export default function OrderDetailPage() {
         </div>
       </div>
 
-      {/* Order Items */}
       <div style={{ backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", overflow: "hidden", marginBottom: "1.5rem", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
         <div style={{ padding: "1rem 1.25rem", borderBottom: "1px solid #F0F0F0", backgroundColor: "#FAFAFA" }}>
           <h2 style={{ color: "#C9A84C", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 700 }}>Order Items</h2>
@@ -178,7 +146,6 @@ export default function OrderDetailPage() {
         </table>
       </div>
 
-      {/* Pricing Breakdown */}
       <div style={{ backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", padding: "1.25rem", maxWidth: "360px", marginLeft: "auto", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
         <h2 style={{ color: "#C9A84C", fontSize: "0.72rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem", fontWeight: 700 }}>Pricing Breakdown</h2>
         {[

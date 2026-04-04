@@ -1,18 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-
-interface MerchantOrder {
-  id: string;
-  merchantName: string;
-  invoiceNumber: string | null;
-  purity: string;
-  totalWeight: number;
-  totalCost: number;
-  purchaseDate: string;
-  createdAt: string;
-}
+import { db } from "@/lib/mockDb";
+import type { MockMerchantOrder } from "@/lib/mockDb";
 
 const inputStyle: React.CSSProperties = {
   padding: "0.5rem 0.75rem",
@@ -29,26 +20,24 @@ function fmt(n: number) {
 }
 
 export default function MerchantOrdersPage() {
-  const [orders, setOrders] = useState<MerchantOrder[]>([]);
+  const [orders, setOrders] = useState<MockMerchantOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
-  const fetchOrders = useCallback(async () => {
+  useEffect(() => {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (dateFrom) params.set("dateFrom", dateFrom);
-      if (dateTo) params.set("dateTo", dateTo);
-      const res = await fetch(`/api/admin/merchant-orders?${params}`);
-      const data = await res.json();
-      setOrders(data.orders ?? data ?? []);
+      let all = db.merchantOrders.getAll();
+      if (dateFrom) all = all.filter((o) => o.purchaseDate >= dateFrom);
+      if (dateTo) all = all.filter((o) => o.purchaseDate <= dateTo);
+      // Sort newest first
+      all = [...all].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      setOrders(all);
     } finally {
       setLoading(false);
     }
   }, [dateFrom, dateTo]);
-
-  useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
   const totalInvestment = orders.reduce((sum, o) => sum + o.totalCost, 0);
   const totalWeight = orders.reduce((sum, o) => sum + o.totalWeight, 0);
@@ -65,7 +54,6 @@ export default function MerchantOrdersPage() {
         </Link>
       </div>
 
-      {/* Summary stat cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>
         {[
           { label: "Total Orders", value: orders.length, icon: "📋" },
@@ -82,7 +70,6 @@ export default function MerchantOrdersPage() {
         ))}
       </div>
 
-      {/* Filters */}
       <div style={{ backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", padding: "1rem 1.25rem", marginBottom: "1.5rem", display: "flex", gap: "0.75rem", alignItems: "flex-end", flexWrap: "wrap", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
           <label style={{ color: "#C9A84C", fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 700 }}>From Date</label>
@@ -97,7 +84,6 @@ export default function MerchantOrdersPage() {
         </button>
       </div>
 
-      {/* Table */}
       <div style={{ backgroundColor: "#fff", border: "1px solid #F0F0F0", borderRadius: "12px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
