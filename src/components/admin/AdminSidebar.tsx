@@ -18,7 +18,6 @@ const NAV = [
   { href: "/admin/analytics", label: "Analytics", icon: "📊" },
   { href: "/admin/maintenance", label: "Maintenance", icon: "🔧" },
   { href: "/admin/profile", label: "Profile", icon: "👤" },
-  { href: "/admin/test-orders", label: "Test Orders", icon: "🧪" },
 ];
 
 export default function AdminSidebar() {

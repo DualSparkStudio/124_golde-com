@@ -22,7 +22,6 @@ export const DEFAULT_CERT_IMAGES: string[] = [
 
 // Per-item overrides for known problematic entries
 export const PRODUCT_IMAGE_OVERRIDES: Record<string, string> = {
-  "925 silver anklet pair": "https://images.unsplash.com/photo-1520975693411-1f7a2b0b2f8b?w=1200&q=85",
   "22k gold bridal necklace set": "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=1200&q=85",
 };
 
