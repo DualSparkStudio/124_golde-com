@@ -11,7 +11,10 @@ export async function GET(req: NextRequest) {
   const page = parseInt(searchParams.get("page") ?? "1");
   const pageSize = parseInt(searchParams.get("pageSize") ?? "20");
 
+  console.log('=== FETCHING ORDERS ===');
   let orders = db.orders.getAll();
+  console.log('Total orders in DB:', orders.length);
+  
   if (status) orders = orders.filter((o) => o.status === status);
   if (dateFrom) orders = orders.filter((o) => o.createdAt >= dateFrom);
   if (dateTo) orders = orders.filter((o) => o.createdAt <= dateTo + "T23:59:59");
@@ -22,5 +25,9 @@ export async function GET(req: NextRequest) {
 
   const total = orders.length;
   const items = orders.slice((page - 1) * pageSize, page * pageSize);
+  
+  console.log('Filtered orders:', total, 'Page:', page, 'Returning:', items.length);
+  console.log('=== END FETCHING ORDERS ===');
+  
   return NextResponse.json({ orders: items, total, page, pageSize, totalPages: Math.ceil(total / pageSize) });
 }

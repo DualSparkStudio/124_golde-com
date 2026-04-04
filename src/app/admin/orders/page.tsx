@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import DashboardCard from "@/components/admin/DashboardCard";
-import { db } from "@/lib/mockDb";
 
 interface Order {
   id: string;
@@ -54,6 +53,7 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [stats, setStats] = useState<OrderStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [status, setStatus] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -61,38 +61,59 @@ export default function OrdersPage() {
   const [priceMax, setPriceMax] = useState("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [lastFetch, setLastFetch] = useState<string>("");
   const PAGE_SIZE = 20;
 
-  const fetchStats = useCallback(() => {
-    const all = db.orders.getAll();
-    setStats({
-      total: all.length,
-      pending: all.filter(o => o.status === "pending").length,
-      confirmed: all.filter(o => o.status === "confirmed").length,
-      processing: all.filter(o => o.status === "processing").length,
-      shipped: all.filter(o => o.status === "shipped").length,
-      delivered: all.filter(o => o.status === "delivered").length,
-      cancelled: all.filter(o => o.status === "cancelled").length,
-      revenue: all.filter(o => o.status === "delivered").reduce((s, o) => s + o.totalAmount, 0),
-    });
+  const fetchStats = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/orders/stats');
+      const data = await res.json();
+      setStats(data);
+      console.log('Stats fetched:', data);
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
+    }
   }, []);
 
-  const fetchOrders = useCallback(() => {
+  const fetchOrders = useCallback(async () => {
     setLoading(true);
-    let all = db.orders.getAll();
-    if (status) all = all.filter(o => o.status === status);
-    if (dateFrom) all = all.filter(o => o.createdAt >= dateFrom);
-    if (dateTo) all = all.filter(o => o.createdAt <= dateTo + "T23:59:59");
-    if (priceMin) all = all.filter(o => o.totalAmount >= parseFloat(priceMin));
-    if (priceMax) all = all.filter(o => o.totalAmount <= parseFloat(priceMax));
-    all.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    setTotal(all.length);
-    setOrders(all.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE));
-    setLoading(false);
+    setRefreshing(true);
+    try {
+      const params = new URLSearchParams();
+      if (status) params.set('status', status);
+      if (dateFrom) params.set('dateFrom', dateFrom);
+      if (dateTo) params.set('dateTo', dateTo);
+      if (priceMin) params.set('priceMin', priceMin);
+      if (priceMax) params.set('priceMax', priceMax);
+      params.set('page', page.toString());
+      params.set('pageSize', PAGE_SIZE.toString());
+
+      const res = await fetch(`/api/admin/orders?${params.toString()}`);
+      const data = await res.json();
+      setOrders(data.orders || []);
+      setTotal(data.total || 0);
+      setLastFetch(new Date().toLocaleTimeString());
+      console.log('Orders fetched:', data.orders?.length, 'Total:', data.total);
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
+      setOrders([]);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, [status, dateFrom, dateTo, priceMin, priceMax, page]);
 
   useEffect(() => { fetchStats(); }, [fetchStats]);
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
+  
+  // Auto-refresh every 10 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchStats();
+      fetchOrders();
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [fetchStats, fetchOrders]);
 
   function handleFilter(e: React.FormEvent) {
     e.preventDefault();
@@ -101,18 +122,27 @@ export default function OrdersPage() {
   }
 
   async function downloadCSV() {
-    const all = db.orders.getAll();
-    let filtered = all;
-    if (status) filtered = filtered.filter(o => o.status === status);
-    if (dateFrom) filtered = filtered.filter(o => o.createdAt >= dateFrom);
-    if (dateTo) filtered = filtered.filter(o => o.createdAt <= dateTo + "T23:59:59");
-    const header = "Order Number,Customer,Phone,Items,Subtotal,Shipping,GST,Total,Status,Date";
-    const rows = filtered.map(o => [o.orderNumber, o.customerName, o.customerPhone, o.items.length, o.subtotal, o.shippingCost, o.gstAmount, o.totalAmount, o.status, o.createdAt.slice(0, 10)].join(","));
-    const csv = [header, ...rows].join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
-    URL.revokeObjectURL(url);
+    try {
+      const params = new URLSearchParams();
+      if (status) params.set('status', status);
+      if (dateFrom) params.set('dateFrom', dateFrom);
+      if (dateTo) params.set('dateTo', dateTo);
+      params.set('pageSize', '1000'); // Get all orders for export
+      
+      const res = await fetch(`/api/admin/orders?${params.toString()}`);
+      const data = await res.json();
+      const filtered = data.orders || [];
+      
+      const header = "Order Number,Customer,Phone,Items,Subtotal,Shipping,GST,Total,Status,Date";
+      const rows = filtered.map((o: any) => [o.orderNumber, o.customerName, o.customerPhone, o.items.length, o.subtotal, o.shippingCost, o.gstAmount, o.totalAmount, o.status, o.createdAt.slice(0, 10)].join(","));
+      const csv = [header, ...rows].join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = `orders-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to export CSV:', error);
+    }
   }
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
@@ -122,11 +152,23 @@ export default function OrdersPage() {
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "2rem" }}>
         <div>
           <h1 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontSize: "1.75rem", color: "#0A0A0A", marginBottom: "0.25rem" }}>Orders</h1>
-          <p style={{ color: "#888", fontSize: "0.875rem" }}>Manage and track customer orders.</p>
+          <p style={{ color: "#888", fontSize: "0.875rem" }}>
+            Manage and track customer orders.
+            {lastFetch && (
+              <span style={{ marginLeft: "1rem", color: refreshing ? "#C9A84C" : "#4caf7d" }}>
+                {refreshing ? "Refreshing..." : `Last updated: ${lastFetch}`}
+              </span>
+            )}
+          </p>
         </div>
-        <button onClick={downloadCSV} style={{ padding: "0.5rem 1.25rem", backgroundColor: "transparent", color: "#C9A84C", border: "1px solid rgba(201,168,76,0.4)", borderRadius: "8px", cursor: "pointer", fontSize: "0.875rem" }}>
-          ↓ Export CSV
-        </button>
+        <div style={{ display: "flex", gap: "0.75rem" }}>
+          <button onClick={() => { fetchStats(); fetchOrders(); }} style={{ padding: "0.5rem 1.25rem", backgroundColor: "#C9A84C", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "0.875rem", fontWeight: 600 }}>
+            🔄 Refresh
+          </button>
+          <button onClick={downloadCSV} style={{ padding: "0.5rem 1.25rem", backgroundColor: "transparent", color: "#C9A84C", border: "1px solid rgba(201,168,76,0.4)", borderRadius: "8px", cursor: "pointer", fontSize: "0.875rem" }}>
+            ↓ Export CSV
+          </button>
+        </div>
       </div>
 
       {/* Stats */}

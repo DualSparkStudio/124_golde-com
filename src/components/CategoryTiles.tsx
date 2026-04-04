@@ -1,29 +1,51 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 
 const TILES = [
-  { label: "Gold Necklaces", href: "/shop?category=gold&typeId=type-2", image: "https://images.unsplash.com/photo-1573408301185-9519f94816b5?w=600&q=80" },
+  { label: "Gold Necklaces", href: "/shop?category=gold&typeId=type-2", image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&q=80" },
   { label: "Gold Rings", href: "/shop?category=gold&typeId=type-3", image: "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=600&q=80" },
   { label: "Gold Earrings", href: "/shop?category=gold&typeId=type-4", image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80" },
   { label: "Gold Bangles", href: "/shop?category=gold&typeId=type-7", image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&q=80" },
-  { label: "Silver Jewelry", href: "/shop?category=silver", image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&q=80" },
+  { label: "Silver Jewelry", href: "/shop?category=silver", image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80" },
   { label: "Bridal Collection", href: "/shop?occasion=wedding", image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80" },
 ];
 
 function Tile({ label, href, image }: { label: string; href: string; image: string }) {
   const [hovered, setHovered] = useState(false);
+  const [imgError, setImgError] = useState(false);
+  
   return (
     <Link href={href} style={{ textDecoration: "none", display: "block" }}
       onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
-      <div style={{ position: "relative", aspectRatio: "1/1", overflow: "hidden", borderRadius: "4px", cursor: "pointer" }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={image} alt={label} style={{
-          width: "100%", height: "100%", objectFit: "cover",
-          transform: hovered ? "scale(1.08)" : "scale(1)",
-          transition: "transform 0.6s ease",
-        }} />
+      <div style={{ position: "relative", aspectRatio: "1/1", overflow: "hidden", borderRadius: "4px", cursor: "pointer", backgroundColor: "#f5f5f5" }}>
+        {!imgError ? (
+          <Image 
+            src={image} 
+            alt={label}
+            fill
+            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+            style={{
+              objectFit: "cover",
+              transform: hovered ? "scale(1.08)" : "scale(1)",
+              transition: "transform 0.6s ease",
+            }}
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div style={{
+            width: "100%", 
+            height: "100%", 
+            background: "linear-gradient(135deg, #C9A84C 0%, #8B7355 100%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
+          }}>
+            <span style={{ fontSize: "3rem", opacity: 0.3 }}>💎</span>
+          </div>
+        )}
         <div style={{
           position: "absolute", inset: 0,
           background: hovered ? "rgba(0,0,0,0.45)" : "rgba(0,0,0,0.3)",

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Playfair_Display, Inter } from 'next/font/google';
 import './globals.css';
 import Providers from './providers';
+import WhatsAppWidget from '@/components/WhatsAppWidget';
 
 const playfairDisplay = Playfair_Display({
   subsets: ['latin'],
@@ -30,6 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${playfairDisplay.variable} ${inter.variable}`}>
       <body
+        suppressHydrationWarning
         style={{
           backgroundColor: '#FFF8F0',
           color: '#0A0A0A',
@@ -40,6 +42,7 @@ export default function RootLayout({
         }}
       >
         <Providers>{children}</Providers>
+        <WhatsAppWidget />
       </body>
     </html>
   );

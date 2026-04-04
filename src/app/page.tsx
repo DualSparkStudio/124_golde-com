@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getFilteredProducts } from "@/services/productCatalog";
 import Navbar from "@/components/Navbar";
 import ExitIntentPopup from "@/components/ExitIntentPopup";
-import HeroSlider from "@/components/HeroSlider";
+import LuxuryHero from "@/components/LuxuryHero";
 import CategoryTiles from "@/components/CategoryTiles";
 import ProductGrid from "@/components/ProductGrid";
 import WhyChooseUs from "@/components/WhyChooseUs";
@@ -33,8 +33,11 @@ export default async function HomePage() {
       <ExitIntentPopup />
 
       <main>
-        {/* ── Full-screen Hero Slider ── */}
-        <HeroSlider />
+        {/* ── Luxury Hero Section ── */}
+        <LuxuryHero />
+
+        {/* ── Category Tiles ── */}
+        <CategoryTiles />
 
         {/* ── Featured Products ── */}
         {featured.length > 0 && (
@@ -56,9 +59,6 @@ export default async function HomePage() {
             </div>
           </section>
         )}
-
-        {/* ── Category Tiles ── */}
-        <CategoryTiles />
 
         {/* ── Gold Collection ── */}
         {goldProducts.length > 0 && (

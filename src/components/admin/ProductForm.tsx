@@ -38,24 +38,24 @@ const OCCASIONS = ["wedding", "daily-wear", "party", "festival"];
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  padding: "0.625rem 0.875rem",
-  backgroundColor: "#111",
-  border: "1px solid rgba(201,168,76,0.2)",
-  borderRadius: "4px",
-  color: "#E8E8E8",
+  padding: "0.75rem",
+  backgroundColor: "#FAFAFA",
+  border: "1px solid #E8E8E8",
+  borderRadius: "8px",
+  color: "#0A0A0A",
   fontSize: "0.9rem",
   outline: "none",
   boxSizing: "border-box",
+  transition: "border-color 0.2s",
 };
 
 const labelStyle: React.CSSProperties = {
   display: "block",
-  color: "#A0A0A0",
-  fontSize: "0.75rem",
-  letterSpacing: "0.06em",
-  textTransform: "uppercase",
-  marginBottom: "0.375rem",
-  fontWeight: 500,
+  color: "#666",
+  fontSize: "0.85rem",
+  fontWeight: 600,
+  marginBottom: "0.5rem",
+  letterSpacing: "0.02em",
 };
 
 const fieldStyle: React.CSSProperties = { display: "flex", flexDirection: "column", gap: "0.25rem" };
@@ -173,51 +173,54 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1.5rem", maxWidth: "800px" }}>
+    <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "2rem", maxWidth: "900px" }}>
       {error && (
-        <div style={{ padding: "0.75rem 1rem", backgroundColor: "rgba(224,82,82,0.1)", border: "1px solid rgba(224,82,82,0.3)", borderRadius: "4px", color: "#e05252", fontSize: "0.875rem" }}>
+        <div style={{ padding: "1rem", backgroundColor: "#f8d7da", border: "1px solid #f5c6cb", borderRadius: "8px", color: "#721c24", fontSize: "0.9rem" }}>
           {error}
         </div>
       )}
 
       {/* Basic Info */}
-      <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-        <div style={{ ...fieldStyle, gridColumn: "1 / -1" }}>
-          <label style={labelStyle}>Product Name *</label>
-          <input style={inputStyle} value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="e.g. 22K Gold Pendant" required />
-        </div>
-        <div style={fieldStyle}>
-          <label style={labelStyle}>Category *</label>
-          <select style={inputStyle} value={form.category} onChange={(e) => set("category", e.target.value)}>
-            <option value="gold">Gold</option>
-            <option value="silver">Silver</option>
-          </select>
-        </div>
-        <div style={fieldStyle}>
-          <label style={labelStyle}>Type *</label>
-          <select style={inputStyle} value={form.typeId} onChange={(e) => set("typeId", e.target.value)} required>
-            <option value="">Select type...</option>
-            {types.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-          </select>
-        </div>
-        <div style={fieldStyle}>
-          <label style={labelStyle}>Weight (grams) *</label>
-          <input style={inputStyle} type="number" step="0.01" min="0.01" value={form.weight} onChange={(e) => set("weight", e.target.value)} placeholder="e.g. 2.5" required />
-        </div>
-        <div style={fieldStyle}>
-          <label style={labelStyle}>Purity *</label>
-          <input style={inputStyle} value={form.purity} onChange={(e) => set("purity", e.target.value)} placeholder="e.g. 22K, 925" required />
-        </div>
-        <div style={fieldStyle}>
-          <label style={labelStyle}>Quantity *</label>
-          <input style={inputStyle} type="number" min="0" value={form.quantity} onChange={(e) => set("quantity", e.target.value)} required />
+      <section>
+        <h3 style={{ color: "#C9A84C", fontSize: "0.85rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1.5rem", fontWeight: 600 }}>Basic Information</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+          <div style={{ ...fieldStyle, gridColumn: "1 / -1" }}>
+            <label style={labelStyle}>Product Name *</label>
+            <input style={inputStyle} value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="e.g. 22K Gold Pendant" required />
+          </div>
+          <div style={fieldStyle}>
+            <label style={labelStyle}>Category *</label>
+            <select style={inputStyle} value={form.category} onChange={(e) => set("category", e.target.value)}>
+              <option value="gold">Gold</option>
+              <option value="silver">Silver</option>
+            </select>
+          </div>
+          <div style={fieldStyle}>
+            <label style={labelStyle}>Type *</label>
+            <select style={inputStyle} value={form.typeId} onChange={(e) => set("typeId", e.target.value)} required>
+              <option value="">Select type...</option>
+              {types.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+            </select>
+          </div>
+          <div style={fieldStyle}>
+            <label style={labelStyle}>Weight (grams) *</label>
+            <input style={inputStyle} type="number" step="0.01" min="0.01" value={form.weight} onChange={(e) => set("weight", e.target.value)} placeholder="e.g. 2.5" required />
+          </div>
+          <div style={fieldStyle}>
+            <label style={labelStyle}>Purity *</label>
+            <input style={inputStyle} value={form.purity} onChange={(e) => set("purity", e.target.value)} placeholder="e.g. 22K, 925" required />
+          </div>
+          <div style={fieldStyle}>
+            <label style={labelStyle}>Quantity *</label>
+            <input style={inputStyle} type="number" min="0" value={form.quantity} onChange={(e) => set("quantity", e.target.value)} required />
+          </div>
         </div>
       </section>
 
       {/* Pricing */}
       <section>
-        <h3 style={{ color: "#C9A84C", fontSize: "0.8rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem", fontWeight: 600 }}>Pricing</h3>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+        <h3 style={{ color: "#C9A84C", fontSize: "0.85rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1.5rem", fontWeight: 600 }}>Pricing</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
           <div style={fieldStyle}>
             <label style={labelStyle}>Purchase Price (₹) *</label>
             <input style={inputStyle} type="number" step="0.01" min="0" value={form.purchasePrice} onChange={(e) => set("purchasePrice", e.target.value)} required />
@@ -227,23 +230,23 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
             <input style={inputStyle} type="number" step="0.01" min="0" value={form.makingCharges} onChange={(e) => set("makingCharges", e.target.value)} required />
           </div>
           <div style={fieldStyle}>
-            <label style={labelStyle}>Sale Price (₹) <span style={{ color: "#666" }}>(leave blank for "Price on Request")</span></label>
-            <input style={inputStyle} type="number" step="0.01" min="0" value={form.salePrice} onChange={(e) => set("salePrice", e.target.value)} />
+            <label style={labelStyle}>Sale Price (₹)</label>
+            <input style={inputStyle} type="number" step="0.01" min="0" value={form.salePrice} onChange={(e) => set("salePrice", e.target.value)} placeholder="Leave blank for 'Price on Request'" />
           </div>
           <div style={fieldStyle}>
             <label style={labelStyle}>Discount Price (₹)</label>
-            <input style={inputStyle} type="number" step="0.01" min="0" value={form.discountPrice} onChange={(e) => set("discountPrice", e.target.value)} />
+            <input style={inputStyle} type="number" step="0.01" min="0" value={form.discountPrice} onChange={(e) => set("discountPrice", e.target.value)} placeholder="Optional discount price" />
           </div>
         </div>
       </section>
 
       {/* Details */}
       <section>
-        <h3 style={{ color: "#C9A84C", fontSize: "0.8rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem", fontWeight: 600 }}>Details</h3>
-        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+        <h3 style={{ color: "#C9A84C", fontSize: "0.85rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1.5rem", fontWeight: 600 }}>Details</h3>
+        <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
           <div style={fieldStyle}>
             <label style={labelStyle}>Description</label>
-            <textarea style={{ ...inputStyle, minHeight: "100px", resize: "vertical" }} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Describe the product..." />
+            <textarea style={{ ...inputStyle, minHeight: "120px", resize: "vertical", fontFamily: "inherit" }} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Describe the product..." />
           </div>
           <div style={fieldStyle}>
             <label style={labelStyle}>Video URL</label>
@@ -251,17 +254,17 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
           </div>
           <div style={fieldStyle}>
             <label style={labelStyle}>Occasions</label>
-            <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+            <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
               {OCCASIONS.map((occ) => (
-                <label key={occ} style={{ display: "flex", alignItems: "center", gap: "0.375rem", cursor: "pointer", color: form.occasion.includes(occ) ? "#C9A84C" : "#A0A0A0", fontSize: "0.875rem" }}>
-                  <input type="checkbox" checked={form.occasion.includes(occ)} onChange={() => toggleOccasion(occ)} style={{ accentColor: "#C9A84C" }} />
+                <label key={occ} style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", color: form.occasion.includes(occ) ? "#C9A84C" : "#666", fontSize: "0.9rem", fontWeight: form.occasion.includes(occ) ? 600 : 400 }}>
+                  <input type="checkbox" checked={form.occasion.includes(occ)} onChange={() => toggleOccasion(occ)} style={{ accentColor: "#C9A84C", width: "18px", height: "18px", cursor: "pointer" }} />
                   {occ.charAt(0).toUpperCase() + occ.slice(1).replace("-", " ")}
                 </label>
               ))}
             </div>
           </div>
-          <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", color: "#A0A0A0", fontSize: "0.875rem" }}>
-            <input type="checkbox" checked={form.isFeatured} onChange={(e) => set("isFeatured", e.target.checked)} style={{ accentColor: "#C9A84C" }} />
+          <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer", color: "#666", fontSize: "0.9rem" }}>
+            <input type="checkbox" checked={form.isFeatured} onChange={(e) => set("isFeatured", e.target.checked)} style={{ accentColor: "#C9A84C", width: "18px", height: "18px", cursor: "pointer" }} />
             Featured product (shown on homepage)
           </label>
         </div>
@@ -269,30 +272,32 @@ export default function ProductForm({ initialData, mode }: ProductFormProps) {
 
       {/* Images */}
       <section>
-        <h3 style={{ color: "#C9A84C", fontSize: "0.8rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1rem", fontWeight: 600 }}>Images *</h3>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1rem" }}>
+        <h3 style={{ color: "#C9A84C", fontSize: "0.85rem", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "1.5rem", fontWeight: 600 }}>Images *</h3>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", marginBottom: "1rem" }}>
           {form.imageUrls.map((url, idx) => (
-            <div key={idx} style={{ position: "relative", width: "100px", height: "100px" }}>
-              <Image src={url} alt={`Product image ${idx + 1}`} fill style={{ objectFit: "cover", borderRadius: "4px", border: idx === 0 ? "2px solid #C9A84C" : "1px solid rgba(201,168,76,0.2)" }} />
-              <button type="button" onClick={() => removeImage(idx)} style={{ position: "absolute", top: "-6px", right: "-6px", width: "20px", height: "20px", borderRadius: "50%", backgroundColor: "#e05252", border: "none", color: "#fff", cursor: "pointer", fontSize: "12px", display: "flex", alignItems: "center", justifyContent: "center" }}>×</button>
-              {idx === 0 && <span style={{ position: "absolute", bottom: "2px", left: "2px", fontSize: "9px", backgroundColor: "#C9A84C", color: "#000", padding: "1px 4px", borderRadius: "2px" }}>Primary</span>}
+            <div key={idx} style={{ position: "relative", width: "120px", height: "120px" }}>
+              <Image src={url} alt={`Product image ${idx + 1}`} fill style={{ objectFit: "cover", borderRadius: "8px", border: idx === 0 ? "2px solid #C9A84C" : "1px solid #E8E8E8" }} />
+              <button type="button" onClick={() => removeImage(idx)} style={{ position: "absolute", top: "-8px", right: "-8px", width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "#e05252", border: "none", color: "#fff", cursor: "pointer", fontSize: "14px", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }}>×</button>
+              {idx === 0 && <span style={{ position: "absolute", bottom: "4px", left: "4px", fontSize: "10px", backgroundColor: "#C9A84C", color: "#fff", padding: "2px 6px", borderRadius: "4px", fontWeight: 600 }}>Primary</span>}
             </div>
           ))}
-          <label style={{ width: "100px", height: "100px", border: "1px dashed rgba(201,168,76,0.3)", borderRadius: "4px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: uploadingImage ? "wait" : "pointer", color: "#666", fontSize: "0.75rem", gap: "0.25rem" }}>
-            <span style={{ fontSize: "1.5rem" }}>{uploadingImage ? "⏳" : "+"}</span>
+          <label style={{ width: "120px", height: "120px", border: "2px dashed #E8E8E8", borderRadius: "8px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", cursor: uploadingImage ? "wait" : "pointer", color: "#999", fontSize: "0.85rem", gap: "0.5rem", backgroundColor: "#FAFAFA", transition: "all 0.2s" }}
+            onMouseEnter={(e) => { if (!uploadingImage) e.currentTarget.style.borderColor = "#C9A84C"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E8E8E8"; }}>
+            <span style={{ fontSize: "2rem" }}>{uploadingImage ? "⏳" : "+"}</span>
             <span>{uploadingImage ? "Uploading..." : "Add Image"}</span>
             <input type="file" accept="image/*" onChange={handleImageUpload} style={{ display: "none" }} disabled={uploadingImage} />
           </label>
         </div>
-        <p style={{ color: "#666", fontSize: "0.75rem" }}>First image is the primary image. Max 10MB per image.</p>
+        <p style={{ color: "#999", fontSize: "0.8rem" }}>First image is the primary image. Max 10MB per image.</p>
       </section>
 
       {/* Submit */}
-      <div style={{ display: "flex", gap: "1rem", paddingTop: "0.5rem" }}>
-        <button type="submit" disabled={loading} style={{ padding: "0.75rem 2rem", backgroundColor: loading ? "#555" : "#C9A84C", color: "#000", border: "none", borderRadius: "4px", fontWeight: 600, cursor: loading ? "not-allowed" : "pointer", fontSize: "0.9rem" }}>
+      <div style={{ display: "flex", gap: "1rem", paddingTop: "1rem", borderTop: "1px solid #F0F0F0" }}>
+        <button type="submit" disabled={loading} style={{ padding: "0.875rem 2.5rem", backgroundColor: loading ? "#ccc" : "#C9A84C", color: "#fff", border: "none", borderRadius: "8px", fontWeight: 600, cursor: loading ? "not-allowed" : "pointer", fontSize: "0.95rem", letterSpacing: "0.02em", transition: "all 0.2s" }}>
           {loading ? "Saving..." : mode === "new" ? "Create Product" : "Save Changes"}
         </button>
-        <button type="button" onClick={() => router.back()} style={{ padding: "0.75rem 1.5rem", backgroundColor: "transparent", color: "#A0A0A0", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "4px", cursor: "pointer", fontSize: "0.9rem" }}>
+        <button type="button" onClick={() => router.back()} style={{ padding: "0.875rem 2rem", backgroundColor: "#fff", color: "#666", border: "1px solid #E8E8E8", borderRadius: "8px", cursor: "pointer", fontSize: "0.95rem", fontWeight: 600, transition: "all 0.2s" }}>
           Cancel
         </button>
       </div>

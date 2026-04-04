@@ -21,11 +21,53 @@ export default function CartPage() {
     e.preventDefault();
     if (!form.name || !form.phone) return;
     setPlacing(true);
-    // Simulate order placement
-    await new Promise((r) => setTimeout(r, 1000));
-    clearCart();
-    setOrderPlaced(true);
-    setPlacing(false);
+    
+    try {
+      // Create order via API
+      const orderData = {
+        customerName: form.name,
+        customerPhone: form.phone,
+        customerEmail: form.email || null,
+        items: cartItems.map(item => ({
+          productId: item.productId,
+          productName: item.name,
+          weight: item.weight,
+          quantity: item.quantity,
+          unitPrice: item.price,
+          makingCharges: 0, // You can calculate this based on your logic
+          purchasePrice: 0, // This should come from product data
+        })),
+        subtotal: cartTotal,
+        shippingCost: shipping,
+        gstAmount: gst,
+        gstRate: 0.03,
+        totalAmount: grandTotal,
+        notes: form.address || null,
+      };
+
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Server error:', errorData);
+        throw new Error(errorData.error || 'Failed to place order');
+      }
+
+      const result = await response.json();
+      console.log('Order placed successfully:', result);
+
+      clearCart();
+      setOrderPlaced(true);
+    } catch (error) {
+      console.error('Error placing order:', error);
+      alert('Failed to place order. Please try again.');
+    } finally {
+      setPlacing(false);
+    }
   }
 
   if (orderPlaced) {

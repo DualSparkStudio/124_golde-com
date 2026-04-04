@@ -44,7 +44,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
   const fallbackDetail = pickFrom(DEFAULT_PRODUCT_IMAGES, product.id || product.name || product.slug);
   const nameKey = (product.name || product.slug || "").toLowerCase();
   const override = PRODUCT_IMAGE_OVERRIDES[nameKey];
-  const candidatePrimary = override || product.images?.find((i: { isPrimary: boolean }) => i.isPrimary)?.url ?? product.images?.[0]?.url ?? null;
+  const primaryFromImages = product.images?.find((i: { isPrimary: boolean }) => i.isPrimary)?.url ?? product.images?.[0]?.url;
+  const candidatePrimary = override ?? primaryFromImages ?? null;
   const primaryImage = (isValidRemoteImageUrl(candidatePrimary) ? candidatePrimary : fallbackDetail) ?? DEFAULT_PRODUCT_IMAGE;
 
   return (

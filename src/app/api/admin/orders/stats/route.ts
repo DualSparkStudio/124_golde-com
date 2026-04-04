@@ -13,5 +13,8 @@ export async function GET() {
     cancelled: orders.filter((o) => o.status === "cancelled").length,
     revenue: orders.filter((o) => o.status === "delivered").reduce((sum, o) => sum + o.totalAmount, 0),
   };
+  
+  console.log('Stats:', stats);
+  
   return NextResponse.json(stats);
 }

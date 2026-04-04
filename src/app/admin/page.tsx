@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import DashboardCard from "@/components/admin/DashboardCard";
-import { db } from "@/lib/mockDb";
 
 interface OrderStats { total: number; pending: number; confirmed: number; processing: number; shipped: number; delivered: number; cancelled: number; revenue: number; }
 interface Order { id: string; orderNumber: string; customerName: string; customerPhone: string; totalAmount: number; status: string; createdAt: string; }
@@ -28,20 +27,29 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Read directly from localStorage via db (avoids server/client mismatch)
-    const stats = {
-      total: db.orders.getAll().length,
-      pending: db.orders.getAll().filter(o => o.status === "pending").length,
-      confirmed: db.orders.getAll().filter(o => o.status === "confirmed").length,
-      processing: db.orders.getAll().filter(o => o.status === "processing").length,
-      shipped: db.orders.getAll().filter(o => o.status === "shipped").length,
-      delivered: db.orders.getAll().filter(o => o.status === "delivered").length,
-      cancelled: db.orders.getAll().filter(o => o.status === "cancelled").length,
-      revenue: db.orders.getAll().filter(o => o.status === "delivered").reduce((s, o) => s + o.totalAmount, 0),
+    const fetchData = async () => {
+      try {
+        // Fetch stats
+        const statsRes = await fetch('/api/admin/orders/stats');
+        const statsData = await statsRes.json();
+        setStats(statsData);
+
+        // Fetch recent orders
+        const ordersRes = await fetch('/api/admin/orders?pageSize=8');
+        const ordersData = await ordersRes.json();
+        setOrders(ordersData.orders || []);
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
     };
-    setStats(stats);
-    setOrders(db.orders.getAll().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 8));
-    setLoading(false);
+
+    fetchData();
+    
+    // Auto-refresh every 10 seconds
+    const interval = setInterval(fetchData, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const fmt = (n: number) => "₹" + n.toLocaleString("en-IN", { maximumFractionDigits: 0 });

@@ -11,9 +11,13 @@ const NAV = [
   { href: "/admin/types", label: "Jewelry Types", icon: "🏷️" },
   { href: "/admin/orders", label: "Orders", icon: "📦" },
   { href: "/admin/merchant-orders", label: "Merchant Orders", icon: "🏪" },
+  { href: "/admin/offers", label: "Offers & Discounts", icon: "🎁" },
   { href: "/admin/other-charges", label: "Other Charges", icon: "⚙️" },
   { href: "/admin/gold-rate", label: "Gold Rate", icon: "✦" },
   { href: "/admin/analytics", label: "Analytics", icon: "📊" },
+  { href: "/admin/maintenance", label: "Maintenance", icon: "🔧" },
+  { href: "/admin/profile", label: "Profile", icon: "👤" },
+  { href: "/admin/test-orders", label: "Test Orders", icon: "🧪" },
 ];
 
 export default function AdminSidebar() {

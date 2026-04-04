@@ -5,12 +5,11 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -141,7 +140,7 @@ model Product {
   salePrice     Decimal?
   discountPrice Decimal?
   makingCharges Decimal
-  occasion      String[]
+  occasion      String   // Comma-separated values
   isFeatured    Boolean        @default(false)
   status        ProductStatus  @default(active)
   images        ProductImage[]

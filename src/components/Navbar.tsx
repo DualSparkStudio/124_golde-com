@@ -7,7 +7,6 @@ import { useStore } from "@/context/StoreContext";
 const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Shop", href: "/shop" },
-  { label: "Products", href: "/shop" },
   { label: "Gallery", href: "/gallery" },
   { label: "Certificates", href: "/certificates" },
   { label: "About", href: "/about" },
@@ -18,25 +17,31 @@ export default function Navbar() {
   const { wishlistCount, cartCount } = useStore();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    // Popup animation on mount
+    setIsVisible(true);
+    
     const onScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const textColor = scrolled ? "#0A0A0A" : "#fff";
-  const bg = scrolled ? "rgba(255,255,255,0.97)" : "transparent";
-  const shadow = scrolled ? "0 2px 20px rgba(0,0,0,0.08)" : "none";
-  const border = scrolled ? "1px solid rgba(0,0,0,0.06)" : "none";
+  const textColor = scrolled ? "#0A0A0A" : "#1A1A1A";
+  const bg = scrolled ? "rgba(255,255,255,0.97)" : "rgba(255,255,255,0.92)";
+  const shadow = scrolled ? "0 2px 20px rgba(0,0,0,0.08)" : "0 2px 12px rgba(0,0,0,0.04)";
+  const border = scrolled ? "1px solid rgba(0,0,0,0.06)" : "1px solid rgba(0,0,0,0.04)";
 
   return (
     <nav style={{
       position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
       backgroundColor: bg, borderBottom: border, boxShadow: shadow,
-      backdropFilter: scrolled ? "blur(12px)" : "none",
+      backdropFilter: "blur(12px)",
       transition: "all 0.4s ease",
       fontFamily: "Inter, system-ui, sans-serif",
+      transform: isVisible ? "translateY(0)" : "translateY(-100%)",
+      opacity: isVisible ? 1 : 0,
     }}>
       <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 32px", display: "flex", alignItems: "center", justifyContent: "space-between", height: "68px" }}>
         {/* Logo */}
@@ -59,7 +64,7 @@ export default function Navbar() {
         <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
           {/* Wishlist */}
           <Link href="/wishlist" aria-label="Wishlist" style={{ position: "relative", color: textColor, textDecoration: "none", display: "flex", alignItems: "center" }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={scrolled ? "#0A0A0A" : "#fff"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={textColor} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
             {wishlistCount > 0 && (
@@ -71,7 +76,7 @@ export default function Navbar() {
 
           {/* Cart */}
           <Link href="/cart" aria-label="Cart" style={{ position: "relative", color: textColor, textDecoration: "none", display: "flex", alignItems: "center" }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={scrolled ? "#0A0A0A" : "#fff"} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={textColor} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
               <line x1="3" y1="6" x2="21" y2="6" />
               <path d="M16 10a4 4 0 01-8 0" />
@@ -86,7 +91,7 @@ export default function Navbar() {
           {/* Hamburger */}
           <button onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu" className="hamburger-btn"
             style={{ background: "none", border: "none", cursor: "pointer", padding: "4px", display: "none" }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={scrolled ? "#0A0A0A" : "#fff"} strokeWidth="2" strokeLinecap="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={textColor} strokeWidth="2" strokeLinecap="round">
               {menuOpen ? (<><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>) : (<><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></>)}
             </svg>
           </button>
