@@ -192,7 +192,7 @@ export default function AnalyticsPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" />
                   <XAxis dataKey="date" tick={{ fill: "#888", fontSize: 11 }} tickFormatter={(v) => v.slice(5)} />
                   <YAxis tick={{ fill: "#888", fontSize: 11 }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
-                  <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => fmt(v)} />
+                  <Tooltip contentStyle={tooltipStyle} formatter={(v) => fmt(Number(v))} />
                   <Bar dataKey="revenue" fill="#C9A84C" name="Revenue" radius={[2, 2, 0, 0]} />
                   <Bar dataKey="profit" fill="#4caf7d" name="Profit" radius={[2, 2, 0, 0]} />
                 </BarChart>
@@ -209,7 +209,7 @@ export default function AnalyticsPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" />
                   <XAxis dataKey="month" tick={{ fill: "#888", fontSize: 11 }} />
                   <YAxis tick={{ fill: "#888", fontSize: 11 }} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
-                  <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => fmt(v)} />
+                  <Tooltip contentStyle={tooltipStyle} formatter={(v) => fmt(Number(v))} />
                   <Bar dataKey="revenue" fill="#C9A84C" name="Revenue" radius={[2, 2, 0, 0]} />
                   <Bar dataKey="profit" fill="#4caf7d" name="Profit" radius={[2, 2, 0, 0]} />
                 </BarChart>

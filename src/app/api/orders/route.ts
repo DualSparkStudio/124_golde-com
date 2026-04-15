@@ -38,7 +38,6 @@ export async function POST(req: NextRequest) {
     // Create order with mockDb
     const order = db.orders.create({
       orderNumber,
-      customerId: null,
       customerName,
       customerPhone,
       customerEmail: customerEmail || null,
