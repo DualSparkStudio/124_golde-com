@@ -6,7 +6,7 @@ import type {
   GoldRateSource,
   JewelryCategory,
   UserRole,
-} from "../generated/prisma/enums";
+} from "@prisma/client";
 
 // Re-export enums for convenience
 export type {
