@@ -113,7 +113,7 @@ export default function ShopPage() {
       <Navbar />
       <main style={{ backgroundColor: "#fff", minHeight: "100vh", animation: "fadeInUp 300ms ease" }}>
         {/* Hero */}
-        <div style={{ position: "relative", paddingTop: "160px", paddingBottom: "80px", textAlign: "center", backgroundColor: "#0A0A0A", overflow: "hidden" }}>
+        <div style={{ position: "relative", paddingTop: "clamp(120px, 20vw, 160px)", paddingBottom: "clamp(48px, 10vw, 80px)", textAlign: "center", backgroundColor: "#0A0A0A", overflow: "hidden" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=1600&q=80" alt="" aria-hidden="true"
             style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", opacity: 0.35, pointerEvents: "none" }} />
@@ -159,10 +159,10 @@ export default function ShopPage() {
           </div>
 
           {/* Layout */}
-          <div style={{ display: "flex", gap: "40px", alignItems: "flex-start", marginTop: "28px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "40px", alignItems: "flex-start", marginTop: "28px" }} className="shop-layout">
             {/* Sidebar */}
-            <aside style={{ width: "260px", flexShrink: 0, position: "sticky", top: "80px" }}>
-              <div style={{ backgroundColor: "#fff", border: "1px solid #f0f0f0", borderRadius: "12px", padding: "24px", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
+            <aside style={{ width: "100%", flexShrink: 0 }} className="shop-sidebar">
+              <div style={{ backgroundColor: "#fff", border: "1px solid #f0f0f0", borderRadius: "12px", padding: "clamp(16px, 4vw, 24px)", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px", paddingBottom: "16px", borderBottom: "1px solid #f5f5f5" }}>
                   <h3 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "1.1rem", margin: 0, color: "#0A0A0A" }}>Filters</h3>
                   <button onClick={reset} style={{ background: "none", border: "none", color: "#C9A84C", fontSize: "0.78rem", cursor: "pointer", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}>Reset</button>

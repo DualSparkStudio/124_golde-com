@@ -62,7 +62,7 @@ export default async function HomePage() {
 
         {/* ── Gold Collection ── */}
         {goldProducts.length > 0 && (
-          <section style={{ padding: "80px 24px", backgroundColor: "#FFF8F0" }}>
+          <section style={{ padding: "clamp(48px, 8vw, 80px) clamp(16px, 4vw, 24px)", backgroundColor: "#FFF8F0" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "40px", flexWrap: "wrap", gap: "16px" }}>
                 <div>
@@ -80,7 +80,7 @@ export default async function HomePage() {
 
         {/* ── Silver Collection ── */}
         {silverProducts.length > 0 && (
-          <section style={{ padding: "80px 24px", backgroundColor: "#fff" }}>
+          <section style={{ padding: "clamp(48px, 8vw, 80px) clamp(16px, 4vw, 24px)", backgroundColor: "#fff" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "40px", flexWrap: "wrap", gap: "16px" }}>
                 <div>

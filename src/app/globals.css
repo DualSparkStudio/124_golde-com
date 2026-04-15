@@ -67,6 +67,28 @@ h1, h2, h3, h4, h5, h6 {
 html { scroll-behavior: smooth; }
 
 /* Cart responsive */
-@media (max-width: 900px) {
-  .cart-grid { grid-template-columns: 1fr !important; }
+@media (min-width: 900px) {
+  .cart-grid { grid-template-columns: 1fr 380px !important; }
+}
+
+@media (max-width: 600px) {
+  .cart-grid { padding: 24px 16px 60px !important; }
+}
+
+/* Shop layout responsive */
+@media (min-width: 1024px) {
+  .shop-layout { flex-direction: row !important; }
+  .shop-sidebar { 
+    width: 260px !important; 
+    position: sticky !important;
+    top: 80px !important;
+  }
+}
+
+/* Touch targets for mobile */
+@media (max-width: 768px) {
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }

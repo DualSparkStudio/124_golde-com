@@ -55,7 +55,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         <div style={{ height: "88px" }} />
 
         {/* Breadcrumb */}
-        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "20px 32px", fontSize: "0.8rem", color: "#999", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "20px clamp(16px, 4vw, 32px)", fontSize: "0.8rem", color: "#999", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
           <Link href="/" style={{ color: "#C9A84C", textDecoration: "none", fontWeight: 500 }}>Home</Link>
           <span style={{ color: "#ddd" }}>›</span>
           <Link href="/shop" style={{ color: "#C9A84C", textDecoration: "none", fontWeight: 500 }}>Shop</Link>
@@ -66,7 +66,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
         </div>
 
         {/* Product layout */}
-        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 32px 90px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "64px" }}>
+        <div style={{ maxWidth: "1280px", margin: "0 auto", padding: "0 clamp(16px, 4vw, 32px) 90px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap: "clamp(32px, 6vw, 64px)" }}>
           {/* Gallery */}
           <ProductImageGallery images={product.images} productName={product.name} />
 
@@ -180,13 +180,13 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
         {/* Related Products */}
         {related.length > 0 && (
-          <section style={{ padding: "80px 32px", backgroundColor: "#FFF8F0", borderTop: "1px solid rgba(201,168,76,0.1)" }}>
+          <section style={{ padding: "clamp(48px, 8vw, 80px) clamp(16px, 4vw, 32px)", backgroundColor: "#FFF8F0", borderTop: "1px solid rgba(201,168,76,0.1)" }}>
             <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
               <div style={{ textAlign: "center", marginBottom: "48px" }}>
                 <p style={{ color: "#C9A84C", fontSize: "0.75rem", letterSpacing: "0.2em", textTransform: "uppercase", margin: "0 0 10px" }}>You May Also Like</p>
                 <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "clamp(1.6rem, 3vw, 2.2rem)", color: "#0A0A0A", margin: 0 }}>Related Pieces</h2>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "24px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 240px), 1fr))", gap: "clamp(16px, 3vw, 24px)" }}>
                 {related.map((p) => <ProductCard key={p.id} product={p as never} />)}
               </div>
             </div>

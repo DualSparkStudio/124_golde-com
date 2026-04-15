@@ -102,7 +102,7 @@ export default function CartPage() {
           <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "clamp(2rem, 4vw, 3rem)", color: "#FFF8F0", margin: 0 }}>Shopping Cart</h1>
         </div>
 
-        <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "40px 24px 80px", display: "grid", gridTemplateColumns: "1fr 380px", gap: "32px", alignItems: "flex-start" }} className="cart-grid">
+        <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "clamp(24px, 5vw, 40px) clamp(16px, 4vw, 24px) 80px", display: "grid", gridTemplateColumns: "1fr", gap: "32px", alignItems: "flex-start" }} className="cart-grid">
           {/* Cart Items */}
           <div>
             {cartItems.length === 0 ? (
