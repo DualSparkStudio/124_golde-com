@@ -28,7 +28,7 @@ export interface ProductImage {
   url: string;
   isPrimary: boolean;
   sortOrder: number;
-  createdAt: Date;
+  createdAt?: Date;
 }
 
 // ─── Product ──────────────────────────────────────────────────────────────────
