@@ -5,27 +5,59 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
 
-const NAV = [
+const NAV_SECTIONS = [
+  {
+    id: "starter",
+    label: "Starter",
+    icon: "🚀",
+    items: [
+      { href: "/admin/products", label: "Products", icon: "💎" },
+      { href: "/admin/types", label: "Category Types", icon: "🏷️" },
+      { href: "/admin/orders", label: "Orders", icon: "📦" },
+      { href: "/admin/other-charges", label: "Other Charges", icon: "⚙️" },
+    ]
+  },
+  {
+    id: "mid",
+    label: "Mid",
+    icon: "📈",
+    items: [
+      { href: "/admin/offers", label: "Offers & Discounts", icon: "🎁" },
+      { href: "/admin/analytics", label: "Revenue Analytics", icon: "📊" },
+    ]
+  },
+  {
+    id: "premium",
+    label: "Add Ons",
+    icon: "⚡",
+    items: [
+      { href: "/admin/merchant-orders", label: "Merchant Orders", icon: "🏪" },
+      { href: "/admin/appointments", label: "Appointments", icon: "📅" },
+      { href: "/admin/gold-rate", label: "Gold Rate", icon: "✦" },
+    ]
+  }
+];
+
+const STANDALONE_NAV = [
   { href: "/admin", label: "Dashboard", icon: "🏠" },
-  { href: "/admin/products", label: "Products", icon: "💎" },
-  { href: "/admin/types", label: "Jewelry Types", icon: "🏷️" },
-  { href: "/admin/orders", label: "Orders", icon: "📦" },
-  { href: "/admin/merchant-orders", label: "Merchant Orders", icon: "🏪" },
-  { href: "/admin/appointments", label: "Appointments", icon: "📅" },
-  { href: "/admin/offers", label: "Offers & Discounts", icon: "🎁" },
-  { href: "/admin/other-charges", label: "Other Charges", icon: "⚙️" },
-  { href: "/admin/gold-rate", label: "Gold Rate", icon: "✦" },
-  { href: "/admin/analytics", label: "Analytics", icon: "📊" },
-  { href: "/admin/maintenance", label: "Maintenance", icon: "🔧" },
   { href: "/admin/profile", label: "Profile", icon: "👤" },
 ];
 
 export default function AdminSidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
+    starter: true,
+    mid: true,
+    premium: false,
+  });
 
   const isActive = (href: string) =>
     href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
+
+  const toggleSection = (sectionId: string) => {
+    setOpenSections(prev => ({ ...prev, [sectionId]: !prev[sectionId] }));
+  };
 
   const sidebar = (
     <div style={{
@@ -48,7 +80,9 @@ export default function AdminSidebar() {
       {/* Nav */}
       <nav style={{ flex: 1, padding: "1rem 0.75rem", overflowY: "auto" }}>
         <div style={{ fontSize: "0.65rem", color: "#bbb", letterSpacing: "0.12em", textTransform: "uppercase", fontWeight: 600, padding: "0 0.75rem", marginBottom: "8px" }}>Main Menu</div>
-        {NAV.map(({ href, label, icon }) => {
+        
+        {/* Standalone items */}
+        {STANDALONE_NAV.map(({ href, label, icon }) => {
           const active = isActive(href);
           return (
             <Link key={href} href={href} onClick={() => setMobileOpen(false)} style={{
@@ -67,6 +101,91 @@ export default function AdminSidebar() {
               <span style={{ fontSize: "1rem", width: "20px", textAlign: "center" }}>{icon}</span>
               <span>{label}</span>
             </Link>
+          );
+        })}
+
+        {/* Dropdown sections */}
+        {NAV_SECTIONS.map((section) => {
+          const isOpen = openSections[section.id];
+          const hasActiveItem = section.items.some(item => isActive(item.href));
+          
+          return (
+            <div key={section.id} style={{ marginTop: "12px" }}>
+              {/* Section header */}
+              <button
+                onClick={() => toggleSection(section.id)}
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "0.6rem 0.75rem",
+                  borderRadius: "8px",
+                  backgroundColor: hasActiveItem ? "rgba(201,168,76,0.05)" : "transparent",
+                  border: "1px solid transparent",
+                  color: hasActiveItem ? "#B8860B" : "#666",
+                  fontSize: "0.875rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                  marginBottom: "4px",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = hasActiveItem ? "rgba(201,168,76,0.08)" : "#F8F9FA";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = hasActiveItem ? "rgba(201,168,76,0.05)" : "transparent";
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <span style={{ fontSize: "1rem", width: "20px", textAlign: "center" }}>{section.icon}</span>
+                  <span>{section.label}</span>
+                </div>
+                <span style={{ fontSize: "0.7rem", transition: "transform 0.2s", transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}>▼</span>
+              </button>
+
+              {/* Section items */}
+              {isOpen && (
+                <div style={{ marginLeft: "12px", borderLeft: "2px solid #F0F0F0", paddingLeft: "8px" }}>
+                  {section.items.map(({ href, label, icon }) => {
+                    const active = isActive(href);
+                    return (
+                      <Link key={href} href={href} onClick={() => setMobileOpen(false)} style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                        padding: "0.5rem 0.75rem",
+                        borderRadius: "6px",
+                        marginBottom: "2px",
+                        color: active ? "#B8860B" : "#666",
+                        backgroundColor: active ? "rgba(201,168,76,0.1)" : "transparent",
+                        textDecoration: "none",
+                        fontSize: "0.8rem",
+                        fontWeight: active ? 600 : 400,
+                        transition: "all 0.15s",
+                        border: active ? "1px solid rgba(201,168,76,0.2)" : "1px solid transparent",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!active) {
+                          e.currentTarget.style.backgroundColor = "#F8F9FA";
+                          e.currentTarget.style.color = "#0A0A0A";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!active) {
+                          e.currentTarget.style.backgroundColor = "transparent";
+                          e.currentTarget.style.color = "#666";
+                        }
+                      }}
+                      >
+                        <span style={{ fontSize: "0.9rem", width: "18px", textAlign: "center" }}>{icon}</span>
+                        <span>{label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           );
         })}
       </nav>
